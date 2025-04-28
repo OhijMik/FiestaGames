@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     public float gravity = 20.0f;
     public float lookSpeed = 2.0f;
     public float lookXLimit = 90.0f;
+    public float rotationSpeed = 200.0f;
 
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
@@ -20,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private float cameraYOffset = 0.4f;
     private Camera playerCamera;
+    [SerializeField] private GameObject playerBody;
 
     private Alteruna.Avatar _avatar;
 
@@ -35,8 +37,8 @@ public class PlayerMovement : MonoBehaviour
         playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
         playerCamera.transform.SetParent(transform);
         // Lock cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Cursor.lockState = CursorLockMode.Locked;
+        // Cursor.visible = false;
     }
 
     void Update()
@@ -50,13 +52,23 @@ public class PlayerMovement : MonoBehaviour
         isRunning = Input.GetKey(KeyCode.LeftShift);
 
         // We are grounded, so recalculate move direction based on axis
-        Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 right = transform.TransformDirection(Vector3.right);
+        // Vector3 forward = playerBody.transform.forward;
 
-        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") : 0;
-        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") : 0;
+        // float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") : 0;
+        // float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") : 0;
         float movementDirectionY = moveDirection.y;
-        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+        if (canMove)
+        {
+            if (isRunning)
+            {
+                moveDirection = playerBody.transform.forward * runningSpeed * Input.GetAxis("Vertical");
+            }
+            else
+            {
+                moveDirection = playerBody.transform.forward * walkingSpeed * Input.GetAxis("Vertical");
+            }
+        }
+
 
         if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
         {
@@ -72,16 +84,23 @@ public class PlayerMovement : MonoBehaviour
             moveDirection.y -= gravity * Time.deltaTime;
         }
 
+        // Capture horizontal input
+        float horizontalInput = Input.GetAxis("Horizontal");
+
+        // Rotate the character
+        playerBody.transform.Rotate(0, horizontalInput * rotationSpeed * Time.deltaTime, 0);
+
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
 
+
         // Player and Camera rotation
-        if (canMove && playerCamera != null)
-        {
-            rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
-            rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
-            playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
-            transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
-        }
+        // if (canMove && playerCamera != null)
+        // {
+        //     rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
+        //     rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
+        //     playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
+        //     transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
+        // }
     }
 }
