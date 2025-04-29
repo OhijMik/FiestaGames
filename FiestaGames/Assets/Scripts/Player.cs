@@ -15,7 +15,6 @@ public class PlayerMovement : MonoBehaviour
 
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
-    float rotationX = 0;
 
     [HideInInspector] public bool canMove = true;
 
@@ -51,11 +50,6 @@ public class PlayerMovement : MonoBehaviour
         // Press Left Shift to run
         isRunning = Input.GetKey(KeyCode.LeftShift);
 
-        // We are grounded, so recalculate move direction based on axis
-        // Vector3 forward = playerBody.transform.forward;
-
-        // float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") : 0;
-        // float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") : 0;
         float movementDirectionY = moveDirection.y;
         if (canMove)
         {
