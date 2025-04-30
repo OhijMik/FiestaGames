@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -12,6 +14,7 @@ public class PlayerMovement : MonoBehaviour
     public float lookSpeed = 2.0f;
     public float lookXLimit = 90.0f;
     public float rotationSpeed = 200.0f;
+    public float force = 2f;
 
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
@@ -44,8 +47,30 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         if (!_avatar.IsMe)
+        {
             return;
+        }
 
+        movement();
+
+        LayerMask layerMask = LayerMask.GetMask("Player");
+
+        RaycastHit hit;
+        GameObject otherPlayer;
+        if (Physics.Raycast(transform.position, playerBody.transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
+        {
+            otherPlayer = hit.transform.gameObject;
+            if (Input.GetKey(KeyCode.E))
+            {
+                print("pushing");
+                // otherPlayer.GetComponent<CharacterController>().Move(playerBody.transform.forward * Time.deltaTime * 50);
+                otherPlayer.GetComponent<Rigidbody>().AddForce(playerBody.transform.forward * force, ForceMode.Impulse);
+            }
+        }
+
+    }
+    void movement()
+    {
         bool isRunning = false;
 
         // Press Left Shift to run
