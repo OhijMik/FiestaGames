@@ -1,44 +1,35 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
+using Alteruna;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Base setup")]
     public float walkingSpeed = 7.5f;
     public float runningSpeed = 11.5f;
-    public float jumpSpeed = 12.0f;
-    public float gravity = 20.0f;
-    public float lookSpeed = 2.0f;
-    public float lookXLimit = 90.0f;
+    public float jumpForce = 7.0f;
     public float rotationSpeed = 200.0f;
     public float force = 2f;
 
     CharacterController characterController;
-    Vector3 moveDirection = Vector3.zero;
-
-    [HideInInspector] public bool canMove = true;
 
     [SerializeField] private float cameraYOffset = 0.4f;
     private Camera playerCamera;
 
-    [SerializeField] private GameObject playerBody;
-
+    private RigidbodySynchronizable _rigid;
     private Alteruna.Avatar _avatar;
 
-    void Start()
+    void Awake()
     {
         _avatar = GetComponent<Alteruna.Avatar>();
-
-        if (!_avatar.IsMe)
-            return;
-
-        characterController = GetComponent<CharacterController>();
-        playerCamera = Camera.main;
-        playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
-        playerCamera.transform.SetParent(transform);
+        _rigid = GetComponent<RigidbodySynchronizable>();
+        // characterController = GetComponent<CharacterController>();
+        // playerCamera = Camera.main;
+        // playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
+        // playerCamera.transform.SetParent(transform);
         // Lock cursor
         // Cursor.lockState = CursorLockMode.Locked;
         // Cursor.visible = false;
@@ -51,72 +42,66 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        movement();
-
-        LayerMask layerMask = LayerMask.GetMask("Player");
-
-        RaycastHit hit;
-        GameObject otherPlayer;
-        if (Physics.Raycast(transform.position, playerBody.transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
+        if (Input.GetKeyDown(KeyCode.Space) && _rigid.velocity.y == 0)
         {
-            otherPlayer = hit.transform.gameObject;
-            if (Input.GetKey(KeyCode.E))
-            {
-                print("pushing");
-                // otherPlayer.GetComponent<CharacterController>().Move(playerBody.transform.forward * Time.deltaTime * 50);
-                otherPlayer.GetComponent<Rigidbody>().AddForce(playerBody.transform.forward * force, ForceMode.Impulse);
-            }
+            _rigid.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
         }
+
+        // LayerMask layerMask = LayerMask.GetMask("Player");
+
+        // RaycastHit hit;
+        // GameObject otherPlayer;
+        // if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
+        // {
+        //     otherPlayer = hit.transform.gameObject;
+        //     if (Input.GetKey(KeyCode.E))
+        //     {
+        //         print("pushing");
+        //         otherPlayer.GetComponent<CharacterController>().Move(transform.forward * Time.deltaTime * 50);
+        //         // otherPlayer.GetComponent<RigidbodySynchronizable>().AddForce(transform.forward * force, ForceMode.Impulse);
+        //     }
+        // }
 
     }
-    void movement()
+
+    private void FixedUpdate()
     {
-        bool isRunning = false;
-
-        // Press Left Shift to run
-        isRunning = Input.GetKey(KeyCode.LeftShift);
-
-        float movementDirectionY = moveDirection.y;
-        if (canMove)
+        if (!_avatar.IsMe)
         {
-            if (isRunning)
-            {
-                moveDirection = playerBody.transform.forward * runningSpeed * Input.GetAxis("Vertical");
-            }
-            else
-            {
-                moveDirection = playerBody.transform.forward * walkingSpeed * Input.GetAxis("Vertical");
-            }
-        }
-
-
-        if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
-        {
-            moveDirection.y = jumpSpeed;
-        }
-        else
-        {
-            moveDirection.y = movementDirectionY;
-        }
-
-        if (!characterController.isGrounded)
-        {
-            moveDirection.y -= gravity * Time.deltaTime;
+            return;
         }
 
         // Capture horizontal input
         float horizontalInput = Input.GetAxis("Horizontal");
 
         // Rotate the character
-        playerBody.transform.Rotate(0, horizontalInput * rotationSpeed * Time.deltaTime, 0);
+        transform.Rotate(0, horizontalInput * rotationSpeed * Time.deltaTime, 0);
 
-        // Move the controller
-        characterController.Move(moveDirection * Time.deltaTime);
+        bool isRunning = Input.GetKey(KeyCode.LeftShift);
 
+        Vector3 movementVector = transform.forward * Input.GetAxis("Vertical");
+        movementVector.y = _rigid.velocity.y;
+
+        if (isRunning)
+        {
+            movementVector.x *= runningSpeed;
+            movementVector.z *= runningSpeed;
+            _rigid.velocity = movementVector;
+        }
+        else
+        {
+            movementVector.x *= walkingSpeed;
+            movementVector.z *= walkingSpeed;
+            _rigid.velocity = movementVector;
+        }
 
         if (transform.position.y < -50)
         {
             transform.position = new Vector3(0, 1, 0);
         }
+    }
+    void movement()
+    {
+
     }
 }
