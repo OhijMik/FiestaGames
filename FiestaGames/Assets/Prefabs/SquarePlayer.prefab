@@ -264,9 +264,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bea0a6ea366dfda4dab98dae7b95bec2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkingSpeed: 10
-  runningSpeed: 15
-  jumpForce: 7
+  walkingSpeed: 5
+  runningSpeed: 10
+  jumpForce: 10
   rotationSpeed: 200
   force: 2
   cameraYOffset: 0.4

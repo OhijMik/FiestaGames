@@ -8,13 +8,11 @@ using UnityEngine.UIElements;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Base setup")]
-    public float walkingSpeed = 7.5f;
-    public float runningSpeed = 11.5f;
-    public float jumpForce = 7.0f;
+    public float walkingSpeed = 5f;
+    public float runningSpeed = 10f;
+    public float jumpForce = 10.0f;
     public float rotationSpeed = 200.0f;
     public float force = 2f;
-
-    CharacterController characterController;
 
     [SerializeField] private float cameraYOffset = 0.4f;
     private Camera playerCamera;
@@ -47,21 +45,19 @@ public class PlayerMovement : MonoBehaviour
             _rigid.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
         }
 
-        // LayerMask layerMask = LayerMask.GetMask("Player");
+        LayerMask layerMask = LayerMask.GetMask("Player");
 
-        // RaycastHit hit;
-        // GameObject otherPlayer;
-        // if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
-        // {
-        //     otherPlayer = hit.transform.gameObject;
-        //     if (Input.GetKey(KeyCode.E))
-        //     {
-        //         print("pushing");
-        //         otherPlayer.GetComponent<CharacterController>().Move(transform.forward * Time.deltaTime * 50);
-        //         // otherPlayer.GetComponent<RigidbodySynchronizable>().AddForce(transform.forward * force, ForceMode.Impulse);
-        //     }
-        // }
-
+        RaycastHit hit;
+        GameObject otherPlayer;
+        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
+        {
+            otherPlayer = hit.transform.gameObject;
+            if (Input.GetKey(KeyCode.E))
+            {
+                print("pushing");
+                otherPlayer.GetComponent<RigidbodySynchronizable>().AddForce(transform.forward * force, ForceMode.Impulse);
+            }
+        }
     }
 
     private void FixedUpdate()
@@ -95,13 +91,11 @@ public class PlayerMovement : MonoBehaviour
             _rigid.velocity = movementVector;
         }
 
+        _rigid.AddForce(Vector3.down * 9.8f, ForceMode.Acceleration);
+
         if (transform.position.y < -50)
         {
             transform.position = new Vector3(0, 1, 0);
         }
-    }
-    void movement()
-    {
-
     }
 }
