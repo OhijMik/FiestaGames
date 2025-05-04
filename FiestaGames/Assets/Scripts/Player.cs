@@ -1,29 +1,27 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Alteruna;
 using UnityEngine;
-using UnityEngine.UIElements;
+using Mirror;
+using System.Collections.Generic;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
-    [Header("Base setup")]
+    private Rigidbody rigidbody;
+
     public float walkingSpeed = 5f;
     public float runningSpeed = 10f;
     public float jumpForce = 10.0f;
     public float rotationSpeed = 200.0f;
-    public float force = 2f;
+    public float force = 20f;
 
-    [SerializeField] private float cameraYOffset = 0.4f;
-    private Camera playerCamera;
+    private float movementSpeed;
 
-    private RigidbodySynchronizable _rigid;
-    private Alteruna.Avatar _avatar;
+    private float inputX;
+    private float inputY;
+
 
     void Awake()
     {
-        _avatar = GetComponent<Alteruna.Avatar>();
-        _rigid = GetComponent<RigidbodySynchronizable>();
+        rigidbody = GetComponent<Rigidbody>();
+
         // characterController = GetComponent<CharacterController>();
         // playerCamera = Camera.main;
         // playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
@@ -35,67 +33,102 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (!_avatar.IsMe)
+        if (isLocalPlayer)
         {
-            return;
-        }
+            // float h = Input.GetAxis("Horizontal");
+            // float v = Input.GetAxis("Vertical");
 
-        if (Input.GetKeyDown(KeyCode.Space) && _rigid.velocity.y == 0)
-        {
-            _rigid.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
-        }
+            // Vector3 playerMovement = new Vector3(h * 0.25f, v * 0.25f, 0);
 
-        LayerMask layerMask = LayerMask.GetMask("Player");
+            // transform.position = transform.position + playerMovement;
 
-        RaycastHit hit;
-        GameObject otherPlayer;
-        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
-        {
-            otherPlayer = hit.transform.gameObject;
-            if (Input.GetKey(KeyCode.E))
+            if (Input.GetKeyDown(KeyCode.Space) && rigidbody.linearVelocity.y == 0)
             {
-                print("pushing");
-                otherPlayer.GetComponent<RigidbodySynchronizable>().AddForce(transform.forward * force, ForceMode.Impulse);
+                rigidbody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
             }
+
+            LayerMask layerMask = LayerMask.GetMask("Player");
+
+            RaycastHit hit;
+            GameObject otherPlayer;
+            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
+            {
+                otherPlayer = hit.transform.gameObject;
+                if (Input.GetKey(KeyCode.E))
+                {
+                    print("pushing");
+                    otherPlayer.GetComponent<Rigidbody>().AddForce(transform.forward * force, ForceMode.Impulse);
+                }
+            }
+
+            inputX = Input.GetAxis("Horizontal");
+            inputY = Input.GetAxis("Vertical");
+
+            movementSpeed = walkingSpeed;
         }
+
+        // LayerMask layerMask = LayerMask.GetMask("Player");
+
+        // RaycastHit hit;
+        // GameObject otherPlayer;
+        // if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
+        // {
+        //     otherPlayer = hit.transform.gameObject;
+        //     if (Input.GetKeyDown(KeyCode.E))
+        //     {
+        //         print("pushing");
+        //         // otherPlayer.GetComponent<RigidbodySynchronizable>().AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
+        //         // otherPlayer.GetComponent<RigidbodySynchronizable>().AddForce(Vector3.forward * force, ForceMode.Impulse);
+        //         Alteruna.Avatar otherAvatar = otherPlayer.GetComponent<Alteruna.Avatar>();
+        //         User user = otherAvatar.Multiplayer.GetUser((ushort)otherAvatar.Owner);
+
+        //         if (user != null)
+        //         {
+        //             ProcedureParameters parameters = new ProcedureParameters();
+        //             parameters.Set("f", force);
+        //             parameters.Set("dirX", transform.forward.x);
+        //             parameters.Set("dirY", transform.forward.y);
+        //             parameters.Set("dirZ", transform.forward.z);
+
+        //             Multiplayer.Instance.InvokeRemoteProcedure("RpcPush", user.Index, parameters);
+        //         }
+        //     }
+        // }
     }
 
     private void FixedUpdate()
     {
-        if (!_avatar.IsMe)
+        if (isLocalPlayer == true)
         {
-            return;
+            // Rotate the character
+            transform.Rotate(0, inputX * rotationSpeed * Time.deltaTime, 0);
+
+            bool isRunning = Input.GetKey(KeyCode.LeftShift);
+
+            Vector3 movementVector = transform.forward * inputY;
+            movementVector.y = rigidbody.linearVelocity.y;
+
+            if (isRunning)
+            {
+                movementVector.x *= runningSpeed;
+                movementVector.z *= runningSpeed;
+                rigidbody.linearVelocity = movementVector;
+            }
+            else
+            {
+                movementVector.x *= walkingSpeed;
+                movementVector.z *= walkingSpeed;
+                rigidbody.linearVelocity = movementVector;
+            }
+
+            rigidbody.AddForce(Vector3.down * 9.8f, ForceMode.Acceleration);
+
+            if (transform.position.y < -50)
+            {
+                transform.position = new Vector3(0, 1, 0);
+            }
         }
 
-        // Capture horizontal input
-        float horizontalInput = Input.GetAxis("Horizontal");
 
-        // Rotate the character
-        transform.Rotate(0, horizontalInput * rotationSpeed * Time.deltaTime, 0);
-
-        bool isRunning = Input.GetKey(KeyCode.LeftShift);
-
-        Vector3 movementVector = transform.forward * Input.GetAxis("Vertical");
-        movementVector.y = _rigid.velocity.y;
-
-        if (isRunning)
-        {
-            movementVector.x *= runningSpeed;
-            movementVector.z *= runningSpeed;
-            _rigid.velocity = movementVector;
-        }
-        else
-        {
-            movementVector.x *= walkingSpeed;
-            movementVector.z *= walkingSpeed;
-            _rigid.velocity = movementVector;
-        }
-
-        _rigid.AddForce(Vector3.down * 9.8f, ForceMode.Acceleration);
-
-        if (transform.position.y < -50)
-        {
-            transform.position = new Vector3(0, 1, 0);
-        }
     }
 }
