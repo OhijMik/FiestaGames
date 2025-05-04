@@ -1,13 +1,15 @@
 using UnityEngine;
 using Mirror;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using System;
 
 public class PlayerMovement : NetworkBehaviour
 {
     private Rigidbody rigidBody;
 
-    public float walkingSpeed = 5f;
-    public float runningSpeed = 10f;
+    public float walkingSpeed = 7f;
+    public float runningSpeed = 12f;
     public float jumpForce = 10.0f;
     public float rotationSpeed = 200.0f;
     public float force = 20f;
@@ -40,7 +42,7 @@ public class PlayerMovement : NetworkBehaviour
 
             // transform.position = transform.position + playerMovement;
 
-            if (Input.GetKeyDown(KeyCode.Space) && rigidBody.linearVelocity.y == 0)
+            if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
             {
                 rigidBody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
             }

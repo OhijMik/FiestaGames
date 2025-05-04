@@ -154,7 +154,6 @@ public class MyNetworkManager : NetworkManager
         foreach (var item in allObjsWithANetworkIdentity)
         {
             item.enabled = true;
-            print("enabled " + item.name);
         }
 
         firstSceneLoaded = false;
