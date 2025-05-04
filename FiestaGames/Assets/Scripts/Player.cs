@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class PlayerMovement : NetworkBehaviour
 {
-    private Rigidbody rigidbody;
+    private Rigidbody rigidBody;
 
     public float walkingSpeed = 5f;
     public float runningSpeed = 10f;
@@ -12,15 +12,13 @@ public class PlayerMovement : NetworkBehaviour
     public float rotationSpeed = 200.0f;
     public float force = 20f;
 
-    private float movementSpeed;
-
     private float inputX;
     private float inputY;
 
 
     void Awake()
     {
-        rigidbody = GetComponent<Rigidbody>();
+        rigidBody = GetComponent<Rigidbody>();
 
         // characterController = GetComponent<CharacterController>();
         // playerCamera = Camera.main;
@@ -42,9 +40,9 @@ public class PlayerMovement : NetworkBehaviour
 
             // transform.position = transform.position + playerMovement;
 
-            if (Input.GetKeyDown(KeyCode.Space) && rigidbody.linearVelocity.y == 0)
+            if (Input.GetKeyDown(KeyCode.Space) && rigidBody.linearVelocity.y == 0)
             {
-                rigidbody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
+                rigidBody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
             }
 
             LayerMask layerMask = LayerMask.GetMask("Player");
@@ -63,8 +61,6 @@ public class PlayerMovement : NetworkBehaviour
 
             inputX = Input.GetAxis("Horizontal");
             inputY = Input.GetAxis("Vertical");
-
-            movementSpeed = walkingSpeed;
         }
 
         // LayerMask layerMask = LayerMask.GetMask("Player");
@@ -106,22 +102,22 @@ public class PlayerMovement : NetworkBehaviour
             bool isRunning = Input.GetKey(KeyCode.LeftShift);
 
             Vector3 movementVector = transform.forward * inputY;
-            movementVector.y = rigidbody.linearVelocity.y;
+            movementVector.y = rigidBody.linearVelocity.y;
 
             if (isRunning)
             {
                 movementVector.x *= runningSpeed;
                 movementVector.z *= runningSpeed;
-                rigidbody.linearVelocity = movementVector;
+                rigidBody.linearVelocity = movementVector;
             }
             else
             {
                 movementVector.x *= walkingSpeed;
                 movementVector.z *= walkingSpeed;
-                rigidbody.linearVelocity = movementVector;
+                rigidBody.linearVelocity = movementVector;
             }
 
-            rigidbody.AddForce(Vector3.down * 9.8f, ForceMode.Acceleration);
+            rigidBody.AddForce(Vector3.down * 9.8f, ForceMode.Acceleration);
 
             if (transform.position.y < -50)
             {
