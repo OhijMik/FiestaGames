@@ -379,7 +379,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   offsetX: 0
-  offsetY: 0
+  offsetY: 450
 --- !u!114 &356089032
 MonoBehaviour:
   m_ObjectHideFlags: 0
