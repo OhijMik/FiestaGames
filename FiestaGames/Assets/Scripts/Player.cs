@@ -3,6 +3,7 @@ using Mirror;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using System;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : NetworkBehaviour
 {
@@ -33,65 +34,65 @@ public class PlayerMovement : NetworkBehaviour
 
     void Update()
     {
-        if (isLocalPlayer)
+        if (!isLocalPlayer) return;
+
+        if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
         {
-            // float h = Input.GetAxis("Horizontal");
-            // float v = Input.GetAxis("Vertical");
-
-            // Vector3 playerMovement = new Vector3(h * 0.25f, v * 0.25f, 0);
-
-            // transform.position = transform.position + playerMovement;
-
-            if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
-            {
-                rigidBody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
-            }
-
-            LayerMask layerMask = LayerMask.GetMask("Player");
-
-            RaycastHit hit;
-            GameObject otherPlayer;
-            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
-            {
-                otherPlayer = hit.transform.gameObject;
-                if (Input.GetKey(KeyCode.E))
-                {
-                    print("pushing");
-                    otherPlayer.GetComponent<Rigidbody>().AddForce(transform.forward * force, ForceMode.Impulse);
-                }
-            }
-
-            inputX = Input.GetAxis("Horizontal");
-            inputY = Input.GetAxis("Vertical");
+            rigidBody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
         }
 
         // LayerMask layerMask = LayerMask.GetMask("Player");
+        // Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 3f, Color.red, 1f);
 
         // RaycastHit hit;
-        // GameObject otherPlayer;
         // if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
         // {
-        //     otherPlayer = hit.transform.gameObject;
-        //     if (Input.GetKeyDown(KeyCode.E))
+        //     NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
+        //     print("pushing1");
+        //     if (Input.GetKey(KeyCode.E))
         //     {
-        //         print("pushing");
-        //         // otherPlayer.GetComponent<RigidbodySynchronizable>().AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
-        //         // otherPlayer.GetComponent<RigidbodySynchronizable>().AddForce(Vector3.forward * force, ForceMode.Impulse);
-        //         Alteruna.Avatar otherAvatar = otherPlayer.GetComponent<Alteruna.Avatar>();
-        //         User user = otherAvatar.Multiplayer.GetUser((ushort)otherAvatar.Owner);
-
-        //         if (user != null)
-        //         {
-        //             ProcedureParameters parameters = new ProcedureParameters();
-        //             parameters.Set("f", force);
-        //             parameters.Set("dirX", transform.forward.x);
-        //             parameters.Set("dirY", transform.forward.y);
-        //             parameters.Set("dirZ", transform.forward.z);
-
-        //             Multiplayer.Instance.InvokeRemoteProcedure("RpcPush", user.Index, parameters);
-        //         }
+        //         print("pushing2");
+        //         CmdPushPlayer(identity);
         //     }
         // }
+
+        if (NetworkServer.active)
+        {
+            // Get the PhysicsScene of this GameObject's scene
+            PhysicsScene currentPhysicsScene = gameObject.scene.GetPhysicsScene();
+
+            // Build ray manually
+            Vector3 origin = transform.position;
+            Vector3 direction = transform.TransformDirection(Vector3.forward);
+
+            Ray ray = new Ray(origin, direction);
+            RaycastHit hit;
+
+            // Use the custom physics scene to perform the raycast
+            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, 3f, LayerMask.GetMask("Player")))
+            {
+                NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
+                if (Input.GetKey(KeyCode.E))
+                {
+                    CmdPushPlayer(identity);
+                }
+            }
+        }
+        else
+        {
+            // On clients: use regular raycast
+            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit, 3f, LayerMask.GetMask("Player")))
+            {
+                NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
+                if (Input.GetKey(KeyCode.E))
+                {
+                    CmdPushPlayer(identity);
+                }
+            }
+        }
+
+        inputX = Input.GetAxis("Horizontal");
+        inputY = Input.GetAxis("Vertical");
     }
 
     private void FixedUpdate()
@@ -128,5 +129,20 @@ public class PlayerMovement : NetworkBehaviour
         }
 
 
+    }
+
+    [Command]
+    void CmdPushPlayer(NetworkIdentity targetNetId)
+    {
+        GameObject target = targetNetId.gameObject;
+        Rigidbody targetRb = target.GetComponent<Rigidbody>();
+        if (targetRb != null)
+        {
+            print("pushing");
+            Scene pusherScene = gameObject.scene;
+            SceneManager.MoveGameObjectToScene(target, pusherScene);
+            // Vector3 pushDir = (transform.TransformDirection(Vector3.forward) + Vector3.up * 0.01f).normalized;
+            targetRb.AddForce(transform.TransformDirection(Vector3.forward) * force, ForceMode.Impulse);
+        }
     }
 }

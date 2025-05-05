@@ -229,7 +229,7 @@ MonoBehaviour:
   runningSpeed: 12
   jumpForce: 10
   rotationSpeed: 200
-  force: 2
+  force: 20
 --- !u!114 &2428353295854451999
 MonoBehaviour:
   m_ObjectHideFlags: 0
