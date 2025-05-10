@@ -18,6 +18,8 @@ public class PlayerMovement : NetworkBehaviour
     private float inputX;
     private float inputY;
 
+    public float pushCooldown = 3;
+
 
     void Awake()
     {
@@ -35,6 +37,15 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
         if (!isLocalPlayer) return;
+
+        if (pushCooldown > 0)
+        {
+            pushCooldown -= Time.deltaTime;
+        }
+        else
+        {
+            pushCooldown = 0;
+        }
 
         if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
         {
@@ -72,21 +83,30 @@ public class PlayerMovement : NetworkBehaviour
             if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, 3f, LayerMask.GetMask("Player")))
             {
                 NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
-                if (Input.GetKey(KeyCode.E))
+                if (Input.GetKey(KeyCode.E) && pushCooldown == 0)
                 {
-                    CmdPushPlayer(identity);
+                    print("server pushing");
+                    direction.y = 0.25f;
+                    print(direction);
+                    CmdPushPlayer(identity, direction.normalized);
+                    pushCooldown = 3;
                 }
             }
         }
         else
         {
             // On clients: use regular raycast
-            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit, 3f, LayerMask.GetMask("Player")))
+            Vector3 direction = transform.TransformDirection(Vector3.forward);
+            if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 3f, LayerMask.GetMask("Player")))
             {
                 NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
-                if (Input.GetKey(KeyCode.E))
+                if (Input.GetKey(KeyCode.E) && pushCooldown == 0)
                 {
-                    CmdPushPlayer(identity);
+                    print("client pushing");
+                    direction.y = 0.25f;
+                    print(direction);
+                    CmdPushPlayer(identity, direction.normalized);
+                    pushCooldown = 3;
                 }
             }
         }
@@ -131,18 +151,31 @@ public class PlayerMovement : NetworkBehaviour
 
     }
 
-    [Command]
-    void CmdPushPlayer(NetworkIdentity targetNetId)
+    [Command(requiresAuthority = false)]
+    void CmdPushPlayer(NetworkIdentity targetNetId, Vector3 dir)
     {
         GameObject target = targetNetId.gameObject;
         Rigidbody targetRb = target.GetComponent<Rigidbody>();
         if (targetRb != null)
         {
             print("pushing");
-            Scene pusherScene = gameObject.scene;
-            SceneManager.MoveGameObjectToScene(target, pusherScene);
             // Vector3 pushDir = (transform.TransformDirection(Vector3.forward) + Vector3.up * 0.01f).normalized;
-            targetRb.AddForce(transform.TransformDirection(Vector3.forward) * force, ForceMode.Impulse);
+            targetRb.AddForce(dir * force, ForceMode.Impulse);
+            Debug.Log(target.name);
+            Debug.Log("Velocity after push: " + targetRb.linearVelocity);
         }
     }
+    // [Command(requiresAuthority = false)]
+    // void CmdPushPlayer(NetworkIdentity targetNetId, Vector3 dir)
+    // {
+    //     TargetPushPlayer(targetNetId.connectionToClient, dir);
+    // }
+
+    // [TargetRpc]
+    // void TargetPushPlayer(NetworkConnection target, Vector3 dir)
+    // {
+    //     print("pushing");
+    //     GetComponent<Rigidbody>().AddForce(dir * force, ForceMode.Impulse);
+    //     print(GetComponent<Rigidbody>().linearVelocity);
+    // }
 }

@@ -19,6 +19,8 @@ public class MyNetworkManager : NetworkManager
     private bool isInTransition;
     private bool firstSceneLoaded;
 
+    private int playerCount = 1;
+
 
     private void Start()
     {
@@ -164,6 +166,8 @@ public class MyNetworkManager : NetworkManager
 
         GameObject player = Instantiate(playerPrefab, startPos);
         player.transform.SetParent(null);
+        player.name = player.name + playerCount.ToString();
+        playerCount++;
 
         yield return new WaitForEndOfFrame();
 
