@@ -20,10 +20,10 @@ public class PlayerMovement : NetworkBehaviour
 
     public float pushCooldown = 3;
 
-
     void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
+
 
         // characterController = GetComponent<CharacterController>();
         // playerCamera = Camera.main;
@@ -56,14 +56,16 @@ public class PlayerMovement : NetworkBehaviour
         // Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 3f, Color.red, 1f);
 
         // RaycastHit hit;
-        // if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 3, layerMask))
+        // Vector3 direction = transform.TransformDirection(Vector3.forward);
+        // if (Physics.Raycast(transform.position, direction, out hit, 3))
         // {
+        //     print("detected");
         //     NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
-        //     print("pushing1");
-        //     if (Input.GetKey(KeyCode.E))
+        //     if (Input.GetKey(KeyCode.E) && pushCooldown == 0)
         //     {
-        //         print("pushing2");
-        //         CmdPushPlayer(identity);
+        //         direction.y = 0.25f;
+        //         CmdPushPlayer(identity, direction.normalized);
+        //         pushCooldown = 3;
         //     }
         // }
 
@@ -86,9 +88,8 @@ public class PlayerMovement : NetworkBehaviour
                 if (Input.GetKey(KeyCode.E) && pushCooldown == 0)
                 {
                     print("server pushing");
-                    direction.y = 0.25f;
-                    print(direction);
-                    CmdPushPlayer(identity, direction.normalized);
+                    // direction = transform.forward + Vector3.up * 0.05f;
+                    CmdPushPlayer(identity, direction);
                     pushCooldown = 3;
                 }
             }
@@ -103,9 +104,8 @@ public class PlayerMovement : NetworkBehaviour
                 if (Input.GetKey(KeyCode.E) && pushCooldown == 0)
                 {
                     print("client pushing");
-                    direction.y = 0.25f;
-                    print(direction);
-                    CmdPushPlayer(identity, direction.normalized);
+                    // direction = transform.forward + Vector3.up * 0.05f;
+                    CmdPushPlayer(identity, direction);
                     pushCooldown = 3;
                 }
             }
@@ -125,22 +125,30 @@ public class PlayerMovement : NetworkBehaviour
             bool isRunning = Input.GetKey(KeyCode.LeftShift);
 
             Vector3 movementVector = transform.forward * inputY;
-            movementVector.y = rigidBody.linearVelocity.y;
 
-            if (isRunning)
-            {
-                movementVector.x *= runningSpeed;
-                movementVector.z *= runningSpeed;
-                rigidBody.linearVelocity = movementVector;
-            }
-            else
-            {
-                movementVector.x *= walkingSpeed;
-                movementVector.z *= walkingSpeed;
-                rigidBody.linearVelocity = movementVector;
-            }
+            // if (pushedDelayCooldown == 0)
+            // {
+            //     // if (isRunning)
+            //     // {
+            //     //     movementVector.x *= runningSpeed;
+            //     //     movementVector.z *= runningSpeed;
+            //     //     rigidBody.linearVelocity = movementVector;
+            //     // }
+            //     // else
+            //     // {
+            //     //     movementVector.x *= walkingSpeed;
+            //     //     movementVector.z *= walkingSpeed;
+            //     //     rigidBody.linearVelocity = movementVector;
+            //     // }
 
-            rigidBody.AddForce(Vector3.down * 9.8f, ForceMode.Acceleration);
+            //     movementVector.x *= walkingSpeed * Time.deltaTime;
+            //     movementVector.z *= walkingSpeed * Time.deltaTime;
+            //     rigidBody.MovePosition(rigidBody.position + movementVector);
+            // }
+            movementVector.x *= walkingSpeed * Time.deltaTime;
+            movementVector.z *= walkingSpeed * Time.deltaTime;
+            movementVector.y = rigidBody.linearVelocity.y * Time.deltaTime;
+            rigidBody.MovePosition(rigidBody.position + movementVector);
 
             if (transform.position.y < -50)
             {
@@ -156,13 +164,18 @@ public class PlayerMovement : NetworkBehaviour
     {
         GameObject target = targetNetId.gameObject;
         Rigidbody targetRb = target.GetComponent<Rigidbody>();
+
         if (targetRb != null)
         {
-            print("pushing");
-            // Vector3 pushDir = (transform.TransformDirection(Vector3.forward) + Vector3.up * 0.01f).normalized;
-            targetRb.AddForce(dir * force, ForceMode.Impulse);
-            Debug.Log(target.name);
-            Debug.Log("Velocity after push: " + targetRb.linearVelocity);
+            Debug.Log($"[Server] Target: {target.name}, Scene: {target.scene.name}");
+            Debug.Log($"[Server] This Player: {name}, Scene: {gameObject.scene.name}");
+            Debug.Log($"[Server] Direction: {dir}");
+
+            // Ensure same scene
+            SceneManager.MoveGameObjectToScene(target, gameObject.scene);
+
+            // targetRb.linearVelocity = dir * force;
+            targetRb.AddForce(dir.normalized * force, ForceMode.Impulse);
         }
     }
     // [Command(requiresAuthority = false)]
@@ -178,4 +191,5 @@ public class PlayerMovement : NetworkBehaviour
     //     GetComponent<Rigidbody>().AddForce(dir * force, ForceMode.Impulse);
     //     print(GetComponent<Rigidbody>().linearVelocity);
     // }
+
 }

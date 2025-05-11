@@ -227,10 +227,11 @@ MonoBehaviour:
   syncInterval: 0
   walkingSpeed: 7
   runningSpeed: 12
-  jumpForce: 10
+  jumpForce: 13
   rotationSpeed: 200
   force: 20
   pushCooldown: 3
+  pushedDelayCooldown: 1
 --- !u!114 &2428353295854451999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,7 +257,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7756159021856399429}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 2
   m_Drag: 0
   m_AngularDrag: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
