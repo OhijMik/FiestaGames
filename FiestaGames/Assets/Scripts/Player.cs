@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using System;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class PlayerMovement : NetworkBehaviour
 {
@@ -19,6 +20,9 @@ public class PlayerMovement : NetworkBehaviour
     private float inputY;
 
     public float pushCooldown = 3;
+    private float pushCurrCooldown = 0;
+
+    private float pushedDelayCooldown = 0;
 
     void Awake()
     {
@@ -38,13 +42,22 @@ public class PlayerMovement : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
 
-        if (pushCooldown > 0)
+        if (pushCurrCooldown > 0)
         {
-            pushCooldown -= Time.deltaTime;
+            pushCurrCooldown -= Time.deltaTime;
         }
         else
         {
-            pushCooldown = 0;
+            pushCurrCooldown = 0;
+        }
+
+        if (pushedDelayCooldown > 0)
+        {
+            pushedDelayCooldown -= Time.deltaTime;
+        }
+        else
+        {
+            pushedDelayCooldown = 0;
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
@@ -85,12 +98,11 @@ public class PlayerMovement : NetworkBehaviour
             if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, 3f, LayerMask.GetMask("Player")))
             {
                 NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
-                if (Input.GetKey(KeyCode.E) && pushCooldown == 0)
+                if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
                 {
-                    print("server pushing");
                     // direction = transform.forward + Vector3.up * 0.05f;
                     CmdPushPlayer(identity, direction);
-                    pushCooldown = 3;
+                    pushCurrCooldown = pushCooldown;
                 }
             }
         }
@@ -101,12 +113,11 @@ public class PlayerMovement : NetworkBehaviour
             if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 3f, LayerMask.GetMask("Player")))
             {
                 NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
-                if (Input.GetKey(KeyCode.E) && pushCooldown == 0)
+                if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
                 {
-                    print("client pushing");
                     // direction = transform.forward + Vector3.up * 0.05f;
                     CmdPushPlayer(identity, direction);
-                    pushCooldown = 3;
+                    pushCurrCooldown = pushCooldown;
                 }
             }
         }
@@ -145,10 +156,12 @@ public class PlayerMovement : NetworkBehaviour
             //     movementVector.z *= walkingSpeed * Time.deltaTime;
             //     rigidBody.MovePosition(rigidBody.position + movementVector);
             // }
-            movementVector.x *= walkingSpeed * Time.deltaTime;
-            movementVector.z *= walkingSpeed * Time.deltaTime;
-            movementVector.y = rigidBody.linearVelocity.y * Time.deltaTime;
-            rigidBody.MovePosition(rigidBody.position + movementVector);
+
+            // Vector3 currentVelocity = rigidBody.linearVelocity;
+            // Vector3 desiredVelocity = transform.forward * inputY * walkingSpeed;
+            // desiredVelocity.y = currentVelocity.y; // Preserve vertical velocity (gravity/jump/push)
+            // rigidBody.linearVelocity = desiredVelocity;
+
 
             if (transform.position.y < -50)
             {
@@ -159,25 +172,69 @@ public class PlayerMovement : NetworkBehaviour
 
     }
 
+    // [Command(requiresAuthority = false)]
+    // void CmdPushPlayer(NetworkIdentity targetNetId, Vector3 dir)
+    // {
+    //     GameObject target = targetNetId.gameObject;
+    //     Rigidbody targetRb = target.GetComponent<Rigidbody>();
+    //     NetworkIdentity netId = target.GetComponent<NetworkIdentity>();
+
+    //     if (targetRb != null)
+    //     {
+    //         // Ensure same scene
+    //         SceneManager.MoveGameObjectToScene(target, gameObject.scene);
+
+    //         // targetRb.linearVelocity = dir * force;
+    //         // targetRb.AddForce(dir.normalized * force, ForceMode.Impulse);
+    //         TargetApplyPush(netId.connectionToClient, dir.normalized * force);
+
+    //     }
+    // }
+
+    // [TargetRpc]
+    // void TargetApplyPush(NetworkConnection target, Vector3 force)
+    // {
+    //     rigidBody.AddForce(force, ForceMode.Impulse);
+    // }
+
     [Command(requiresAuthority = false)]
     void CmdPushPlayer(NetworkIdentity targetNetId, Vector3 dir)
     {
         GameObject target = targetNetId.gameObject;
-        Rigidbody targetRb = target.GetComponent<Rigidbody>();
+        NetworkIdentity netId = target.GetComponent<NetworkIdentity>();
 
-        if (targetRb != null)
+        Debug.Log($"[Server] Command received to push {target.name}");
+
+        if (netId.connectionToClient != null)
         {
-            Debug.Log($"[Server] Target: {target.name}, Scene: {target.scene.name}");
-            Debug.Log($"[Server] This Player: {name}, Scene: {gameObject.scene.name}");
-            Debug.Log($"[Server] Direction: {dir}");
-
-            // Ensure same scene
-            SceneManager.MoveGameObjectToScene(target, gameObject.scene);
-
-            // targetRb.linearVelocity = dir * force;
-            targetRb.AddForce(dir.normalized * force, ForceMode.Impulse);
+            target.GetComponent<PlayerMovement>().AddPushedDelayCooldown();
+            TargetApplyPush(netId.connectionToClient, dir.normalized * force);
+        }
+        else
+        {
+            Debug.LogWarning("[Server] No connectionToClient found on target!");
         }
     }
+
+    [TargetRpc]
+    void TargetApplyPush(NetworkConnection target, Vector3 force)
+    {
+        Rigidbody rb = GetComponent<Rigidbody>();
+
+        if (rb != null)
+        {
+            Debug.Log("[Client] Applying push from server");
+            print(force);
+            rb.AddForce(force, ForceMode.Impulse);
+        }
+    }
+
+    public void AddPushedDelayCooldown()
+    {
+        pushedDelayCooldown = 1;
+    }
+
+
     // [Command(requiresAuthority = false)]
     // void CmdPushPlayer(NetworkIdentity targetNetId, Vector3 dir)
     // {

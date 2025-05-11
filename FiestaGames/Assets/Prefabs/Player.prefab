@@ -231,7 +231,6 @@ MonoBehaviour:
   rotationSpeed: 200
   force: 20
   pushCooldown: 3
-  pushedDelayCooldown: 1
 --- !u!114 &2428353295854451999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,7 +246,7 @@ MonoBehaviour:
   sceneId: 0
   _assetId: 3825443236
   serverOnly: 0
-  visibility: 2
+  visibility: 0
   hasSpawned: 0
 --- !u!54 &7424169970684692394
 Rigidbody:
