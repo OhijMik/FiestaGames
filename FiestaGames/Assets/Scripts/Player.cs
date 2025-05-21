@@ -101,7 +101,7 @@ public class PlayerMovement : NetworkBehaviour
                 if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
                 {
                     // direction = transform.forward + Vector3.up * 0.05f;
-                    CmdPushPlayer(identity, direction);
+                    CmdRequestPush(transform.position, transform.forward);
                     pushCurrCooldown = pushCooldown;
                 }
             }
@@ -116,7 +116,9 @@ public class PlayerMovement : NetworkBehaviour
                 if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
                 {
                     // direction = transform.forward + Vector3.up * 0.05f;
-                    CmdPushPlayer(identity, direction);
+                    // CmdPushPlayer(identity, direction);
+                    // pushCurrCooldown = pushCooldown;
+                    CmdRequestPush(transform.position, transform.forward);
                     pushCurrCooldown = pushCooldown;
                 }
             }
@@ -137,25 +139,25 @@ public class PlayerMovement : NetworkBehaviour
 
             Vector3 movementVector = transform.forward * inputY;
 
-            // if (pushedDelayCooldown == 0)
-            // {
-            //     // if (isRunning)
-            //     // {
-            //     //     movementVector.x *= runningSpeed;
-            //     //     movementVector.z *= runningSpeed;
-            //     //     rigidBody.linearVelocity = movementVector;
-            //     // }
-            //     // else
-            //     // {
-            //     //     movementVector.x *= walkingSpeed;
-            //     //     movementVector.z *= walkingSpeed;
-            //     //     rigidBody.linearVelocity = movementVector;
-            //     // }
+            if (pushedDelayCooldown == 0)
+            {
+                // if (isRunning)
+                // {
+                //     movementVector.x *= runningSpeed;
+                //     movementVector.z *= runningSpeed;
+                //     rigidBody.linearVelocity = movementVector;
+                // }
+                // else
+                // {
+                //     movementVector.x *= walkingSpeed;
+                //     movementVector.z *= walkingSpeed;
+                //     rigidBody.linearVelocity = movementVector;
+                // }
 
-            //     movementVector.x *= walkingSpeed * Time.deltaTime;
-            //     movementVector.z *= walkingSpeed * Time.deltaTime;
-            //     rigidBody.MovePosition(rigidBody.position + movementVector);
-            // }
+                movementVector.x *= walkingSpeed * Time.deltaTime;
+                movementVector.z *= walkingSpeed * Time.deltaTime;
+                rigidBody.MovePosition(rigidBody.position + movementVector);
+            }
 
             // Vector3 currentVelocity = rigidBody.linearVelocity;
             // Vector3 desiredVelocity = transform.forward * inputY * walkingSpeed;
@@ -197,6 +199,54 @@ public class PlayerMovement : NetworkBehaviour
     //     rigidBody.AddForce(force, ForceMode.Impulse);
     // }
 
+    [Command]
+    void CmdRequestPush(Vector3 origin, Vector3 direction)
+    {
+        PhysicsSim sim = FindObjectOfType<PhysicsSim>();
+        if (sim == null)
+        {
+            Debug.LogError("No PhysicsSim found on server!");
+            return;
+        }
+
+        PhysicsScene serverScene = sim.GetScene();
+
+        if (!serverScene.IsValid())
+        {
+            Debug.LogError("Invalid server physics scene");
+            return;
+        }
+
+        if (serverScene.Raycast(origin, direction, out RaycastHit hit, 3f, LayerMask.GetMask("Player")))
+        {
+            NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
+            if (netId != null)
+            {
+                GameObject target = netId.gameObject;
+                PlayerMovement targetMovement = target.GetComponent<PlayerMovement>();
+                targetMovement.AddPushedDelayCooldown();
+
+                // Get the correct connection
+                NetworkConnectionToClient conn = netId.connectionToClient;
+
+                if (conn != null)
+                {
+                    targetMovement.TargetApplyPush(conn, direction.normalized * force);
+                }
+                else
+                {
+                    Debug.Log("[Server] No connectionToClient — target is probably the host. Call directly.");
+                    if (targetMovement.isLocalPlayer)
+                    {
+                        targetMovement.ApplyPushDirectly(direction.normalized * force);
+                    }
+                }
+            }
+        }
+    }
+
+
+
     [Command(requiresAuthority = false)]
     void CmdPushPlayer(NetworkIdentity targetNetId, Vector3 dir)
     {
@@ -217,21 +267,36 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     [TargetRpc]
-    void TargetApplyPush(NetworkConnection target, Vector3 force)
+    public void TargetApplyPush(NetworkConnection target, Vector3 force)
     {
-        Rigidbody rb = GetComponent<Rigidbody>();
+        // This runs only on the target client, including host
+        if (!isLocalPlayer)
+        {
+            Debug.Log("[Client] Skipping push: not local player");
+            return;
+        }
 
+        Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
             Debug.Log("[Client] Applying push from server");
-            print(force);
+            rb.AddForce(force, ForceMode.Impulse);
+        }
+    }
+
+    public void ApplyPushDirectly(Vector3 force)
+    {
+        Debug.Log("[Host] Applying push directly");
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
             rb.AddForce(force, ForceMode.Impulse);
         }
     }
 
     public void AddPushedDelayCooldown()
     {
-        pushedDelayCooldown = 1;
+        pushedDelayCooldown = 0.1f;
     }
 
 

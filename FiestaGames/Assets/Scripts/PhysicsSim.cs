@@ -33,4 +33,9 @@ public class PhysicsSim : MonoBehaviour
         }
     }
 
+    public PhysicsScene GetScene()
+    {
+        return physicsScene;
+    }
+
 }
