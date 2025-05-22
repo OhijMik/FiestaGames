@@ -22,8 +22,6 @@ public class PlayerMovement : NetworkBehaviour
     public float pushCooldown = 3;
     private float pushCurrCooldown = 0;
 
-    private float pushedDelayCooldown = 0;
-
     void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
@@ -49,15 +47,6 @@ public class PlayerMovement : NetworkBehaviour
         else
         {
             pushCurrCooldown = 0;
-        }
-
-        if (pushedDelayCooldown > 0)
-        {
-            pushedDelayCooldown -= Time.deltaTime;
-        }
-        else
-        {
-            pushedDelayCooldown = 0;
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
@@ -120,31 +109,18 @@ public class PlayerMovement : NetworkBehaviour
 
             Vector3 movementVector = transform.forward * inputY;
 
-            if (pushedDelayCooldown == 0)
+            if (isRunning)
             {
-                // if (isRunning)
-                // {
-                //     movementVector.x *= runningSpeed;
-                //     movementVector.z *= runningSpeed;
-                //     rigidBody.linearVelocity = movementVector;
-                // }
-                // else
-                // {
-                //     movementVector.x *= walkingSpeed;
-                //     movementVector.z *= walkingSpeed;
-                //     rigidBody.linearVelocity = movementVector;
-                // }
-
+                movementVector.x *= runningSpeed * Time.deltaTime;
+                movementVector.z *= runningSpeed * Time.deltaTime;
+                rigidBody.MovePosition(rigidBody.position + movementVector);
+            }
+            else
+            {
                 movementVector.x *= walkingSpeed * Time.deltaTime;
                 movementVector.z *= walkingSpeed * Time.deltaTime;
                 rigidBody.MovePosition(rigidBody.position + movementVector);
             }
-
-            // Vector3 currentVelocity = rigidBody.linearVelocity;
-            // Vector3 desiredVelocity = transform.forward * inputY * walkingSpeed;
-            // desiredVelocity.y = currentVelocity.y; // Preserve vertical velocity (gravity/jump/push)
-            // rigidBody.linearVelocity = desiredVelocity;
-
 
             if (transform.position.y < -50)
             {
@@ -180,7 +156,6 @@ public class PlayerMovement : NetworkBehaviour
             {
                 GameObject target = netId.gameObject;
                 PlayerMovement targetMovement = target.GetComponent<PlayerMovement>();
-                targetMovement.AddPushedDelayCooldown();
 
                 // Get the correct connection
                 NetworkConnectionToClient conn = netId.connectionToClient;
@@ -213,7 +188,6 @@ public class PlayerMovement : NetworkBehaviour
 
         if (netId.connectionToClient != null)
         {
-            target.GetComponent<PlayerMovement>().AddPushedDelayCooldown();
             TargetApplyPush(netId.connectionToClient, dir.normalized * force);
         }
         else
@@ -249,11 +223,5 @@ public class PlayerMovement : NetworkBehaviour
             rb.AddForce(force, ForceMode.Impulse);
         }
     }
-
-    public void AddPushedDelayCooldown()
-    {
-        pushedDelayCooldown = 0.1f;
-    }
-
 
 }
