@@ -65,23 +65,6 @@ public class PlayerMovement : NetworkBehaviour
             rigidBody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
         }
 
-        // LayerMask layerMask = LayerMask.GetMask("Player");
-        // Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 3f, Color.red, 1f);
-
-        // RaycastHit hit;
-        // Vector3 direction = transform.TransformDirection(Vector3.forward);
-        // if (Physics.Raycast(transform.position, direction, out hit, 3))
-        // {
-        //     print("detected");
-        //     NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
-        //     if (Input.GetKey(KeyCode.E) && pushCooldown == 0)
-        //     {
-        //         direction.y = 0.25f;
-        //         CmdPushPlayer(identity, direction.normalized);
-        //         pushCooldown = 3;
-        //     }
-        // }
-
         if (NetworkServer.active)
         {
             // Get the PhysicsScene of this GameObject's scene
@@ -116,8 +99,6 @@ public class PlayerMovement : NetworkBehaviour
                 if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
                 {
                     // direction = transform.forward + Vector3.up * 0.05f;
-                    // CmdPushPlayer(identity, direction);
-                    // pushCurrCooldown = pushCooldown;
                     CmdRequestPush(transform.position, transform.forward);
                     pushCurrCooldown = pushCooldown;
                 }
@@ -173,31 +154,6 @@ public class PlayerMovement : NetworkBehaviour
 
 
     }
-
-    // [Command(requiresAuthority = false)]
-    // void CmdPushPlayer(NetworkIdentity targetNetId, Vector3 dir)
-    // {
-    //     GameObject target = targetNetId.gameObject;
-    //     Rigidbody targetRb = target.GetComponent<Rigidbody>();
-    //     NetworkIdentity netId = target.GetComponent<NetworkIdentity>();
-
-    //     if (targetRb != null)
-    //     {
-    //         // Ensure same scene
-    //         SceneManager.MoveGameObjectToScene(target, gameObject.scene);
-
-    //         // targetRb.linearVelocity = dir * force;
-    //         // targetRb.AddForce(dir.normalized * force, ForceMode.Impulse);
-    //         TargetApplyPush(netId.connectionToClient, dir.normalized * force);
-
-    //     }
-    // }
-
-    // [TargetRpc]
-    // void TargetApplyPush(NetworkConnection target, Vector3 force)
-    // {
-    //     rigidBody.AddForce(force, ForceMode.Impulse);
-    // }
 
     [Command]
     void CmdRequestPush(Vector3 origin, Vector3 direction)
@@ -299,19 +255,5 @@ public class PlayerMovement : NetworkBehaviour
         pushedDelayCooldown = 0.1f;
     }
 
-
-    // [Command(requiresAuthority = false)]
-    // void CmdPushPlayer(NetworkIdentity targetNetId, Vector3 dir)
-    // {
-    //     TargetPushPlayer(targetNetId.connectionToClient, dir);
-    // }
-
-    // [TargetRpc]
-    // void TargetPushPlayer(NetworkConnection target, Vector3 dir)
-    // {
-    //     print("pushing");
-    //     GetComponent<Rigidbody>().AddForce(dir * force, ForceMode.Impulse);
-    //     print(GetComponent<Rigidbody>().linearVelocity);
-    // }
 
 }
