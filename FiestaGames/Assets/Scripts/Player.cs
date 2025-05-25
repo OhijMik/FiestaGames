@@ -22,14 +22,13 @@ public class PlayerMovement : NetworkBehaviour
     public float pushCooldown = 3;
     private float pushCurrCooldown = 0;
 
+
     void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
 
-
-        // characterController = GetComponent<CharacterController>();
         // playerCamera = Camera.main;
-        // playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
+        // playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + 50, transform.position.z);
         // playerCamera.transform.SetParent(transform);
         // Lock cursor
         // Cursor.lockState = CursorLockMode.Locked;
