@@ -34,7 +34,7 @@ public class MyNetworkManager : NetworkManager
             scenesToLoad[i] = Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(i + 2));
         }
 
-        players = new GameObject[4];
+        players = new GameObject[maxConnections];
     }
 
     public override void OnServerSceneChanged(string sceneName)

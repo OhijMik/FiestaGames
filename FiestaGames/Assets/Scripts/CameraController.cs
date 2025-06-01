@@ -17,17 +17,25 @@ public class CameraController : NetworkBehaviour
     private void Update()
     {
         if (!isServer) { return; }
-        print("hi");
         players = networkManager.GetPlayers();
         int playerCount = networkManager.GetPlayerCount();
+
+        int disconnectedPlayersCount = 0;
         if (playerCount != 0)
         {
             Vector3 totalPos = new Vector3(0, 0, 0);
             for (int i = 0; i < playerCount; i++)
             {
-                totalPos += players[i].transform.position;
+                if (players[i] != null)
+                {
+                    totalPos += players[i].transform.position;
+                }
+                else
+                {
+                    disconnectedPlayersCount++;
+                }
             }
-            Vector3 pos = totalPos / playerCount;
+            Vector3 pos = totalPos / (playerCount - disconnectedPlayersCount);
             pos.z -= 25;
             pos.y += 15;
             syncedCameraPosition = pos;
