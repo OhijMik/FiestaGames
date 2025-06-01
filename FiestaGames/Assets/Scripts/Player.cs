@@ -26,13 +26,6 @@ public class PlayerMovement : NetworkBehaviour
     void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
-
-        // playerCamera = Camera.main;
-        // playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + 50, transform.position.z);
-        // playerCamera.transform.SetParent(transform);
-        // Lock cursor
-        // Cursor.lockState = CursorLockMode.Locked;
-        // Cursor.visible = false;
     }
 
     void Update()

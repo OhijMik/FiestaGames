@@ -1,21 +1,23 @@
 using UnityEngine;
 using Mirror;
-using System.Threading;
-using Mirror.Examples.Basic;
 
-public class CameraController : MonoBehaviour
+public class CameraController : NetworkBehaviour
 {
     MyNetworkManager networkManager;
     GameObject[] players;
 
+    private Vector3 syncedCameraPosition;
+
     private void Start()
     {
-        DontDestroyOnLoad(this.gameObject);
+        // DontDestroyOnLoad(this.gameObject);
         networkManager = GameObject.Find("Network Manager Kcp").GetComponent<MyNetworkManager>();
     }
 
     private void Update()
     {
+        if (!isServer) { return; }
+        print("hi");
         players = networkManager.GetPlayers();
         int playerCount = networkManager.GetPlayerCount();
         if (playerCount != 0)
@@ -28,8 +30,9 @@ public class CameraController : MonoBehaviour
             Vector3 pos = totalPos / playerCount;
             pos.z -= 25;
             pos.y += 15;
-            transform.position = pos;
+            syncedCameraPosition = pos;
         }
+        transform.position = syncedCameraPosition;
 
     }
 }
