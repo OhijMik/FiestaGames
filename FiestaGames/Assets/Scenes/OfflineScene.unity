@@ -431,7 +431,7 @@ MonoBehaviour:
   offlineSceneLoadDelay: 0
   transport: {fileID: 356089032}
   networkAddress: localhost
-  maxConnections: 100
+  maxConnections: 4
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
@@ -456,6 +456,7 @@ MonoBehaviour:
   timeInterpolationGui: 0
   firstSceneToLoad: GameScene
   fadeInOut: {fileID: 621120768}
+  players: []
 --- !u!1 &621120763
 GameObject:
   m_ObjectHideFlags: 0

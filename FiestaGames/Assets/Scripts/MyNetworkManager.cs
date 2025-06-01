@@ -4,6 +4,7 @@ using System.IO;
 using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEditor.UI;
 
 
 public class MyNetworkManager : NetworkManager
@@ -19,7 +20,8 @@ public class MyNetworkManager : NetworkManager
     private bool isInTransition;
     private bool firstSceneLoaded;
 
-    private int playerCount = 1;
+    private int playerCount = 0;
+    private GameObject[] players;
 
 
     private void Start()
@@ -31,6 +33,8 @@ public class MyNetworkManager : NetworkManager
         {
             scenesToLoad[i] = Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(i + 2));
         }
+
+        players = new GameObject[4];
     }
 
     public override void OnServerSceneChanged(string sceneName)
@@ -167,6 +171,8 @@ public class MyNetworkManager : NetworkManager
         GameObject player = Instantiate(playerPrefab, startPos);
         player.transform.SetParent(null);
         player.name = player.name + playerCount.ToString();
+
+        players[playerCount] = player;
         playerCount++;
 
         yield return new WaitForEndOfFrame();
@@ -174,6 +180,16 @@ public class MyNetworkManager : NetworkManager
         SceneManager.MoveGameObjectToScene(player, SceneManager.GetSceneByName(firstSceneToLoad));
 
         NetworkServer.AddPlayerForConnection(conn, player);
+    }
+
+    public GameObject[] GetPlayers()
+    {
+        return players;
+    }
+
+    public int GetPlayerCount()
+    {
+        return playerCount;
     }
 
 }
