@@ -4,8 +4,6 @@ using Mirror;
 public class CameraController : NetworkBehaviour
 {
     MyNetworkManager networkManager;
-    GameObject[] players;
-
     private Vector3 syncedCameraPosition;
 
     private void Start()
@@ -17,7 +15,7 @@ public class CameraController : NetworkBehaviour
     private void Update()
     {
         if (!isServer) { return; }
-        players = networkManager.GetPlayers();
+        GameObject[] players = networkManager.GetPlayers();
         int playerCount = networkManager.GetPlayerCount();
 
         int disconnectedPlayersCount = 0;

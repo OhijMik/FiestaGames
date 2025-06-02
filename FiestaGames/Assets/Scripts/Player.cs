@@ -22,6 +22,14 @@ public class PlayerMovement : NetworkBehaviour
     public float pushCooldown = 3;
     private float pushCurrCooldown = 0;
 
+    private float maxPlayerDist = 5;
+    private float playerTpCooldown = 3;
+    private float playerTpCurrCooldown = 3;
+
+    [SerializeField] Vector3 spawnPoint = new Vector3(0, 1, 0);
+
+    GameObject[] players;
+
 
     void Awake()
     {
@@ -31,6 +39,8 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
         if (!isLocalPlayer) return;
+
+        players = GameObject.FindGameObjectsWithTag("Player");
 
         if (pushCurrCooldown > 0)
         {
@@ -76,7 +86,6 @@ public class PlayerMovement : NetworkBehaviour
             Vector3 direction = transform.TransformDirection(Vector3.forward);
             if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 3f, LayerMask.GetMask("Player")))
             {
-                NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
                 if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
                 {
                     // direction = transform.forward + Vector3.up * 0.05f;
@@ -94,6 +103,8 @@ public class PlayerMovement : NetworkBehaviour
     {
         if (isLocalPlayer == true)
         {
+            players = GameObject.FindGameObjectsWithTag("Player");
+
             // Rotate the character
             transform.Rotate(0, inputX * rotationSpeed * Time.deltaTime, 0);
 
@@ -105,22 +116,52 @@ public class PlayerMovement : NetworkBehaviour
             {
                 movementVector.x *= runningSpeed * Time.deltaTime;
                 movementVector.z *= runningSpeed * Time.deltaTime;
-                rigidBody.MovePosition(rigidBody.position + movementVector);
             }
             else
             {
                 movementVector.x *= walkingSpeed * Time.deltaTime;
                 movementVector.z *= walkingSpeed * Time.deltaTime;
-                rigidBody.MovePosition(rigidBody.position + movementVector);
+            }
+            rigidBody.MovePosition(rigidBody.position + movementVector);
+
+            GameObject nearestPlayer = FindNearestPlayer();
+            if (nearestPlayer != null && Vector3.Distance(transform.position + movementVector, nearestPlayer.transform.position) > maxPlayerDist)
+            {
+                playerTpCurrCooldown -= Time.deltaTime;
+            }
+            else
+            {
+                playerTpCurrCooldown = playerTpCooldown;
             }
 
-            if (transform.position.y < -50)
+            if (transform.position.y < -50 || playerTpCurrCooldown <= 0)
             {
-                transform.position = new Vector3(0, 1, 0);
+                foreach (GameObject player in players)
+                {
+                    player.transform.position = spawnPoint;
+                }
             }
         }
+    }
 
+    private GameObject FindNearestPlayer()
+    {
+        GameObject nearestPlayer = null;
+        float minDistance = float.MaxValue;
 
+        foreach (GameObject player in players)
+        {
+            if (player != gameObject)
+            {
+                float distance = Vector3.Distance(player.transform.position, transform.position);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    nearestPlayer = player;
+                }
+            }
+        }
+        return nearestPlayer;
     }
 
     [Command]
@@ -165,26 +206,6 @@ public class PlayerMovement : NetworkBehaviour
                     }
                 }
             }
-        }
-    }
-
-
-
-    [Command(requiresAuthority = false)]
-    void CmdPushPlayer(NetworkIdentity targetNetId, Vector3 dir)
-    {
-        GameObject target = targetNetId.gameObject;
-        NetworkIdentity netId = target.GetComponent<NetworkIdentity>();
-
-        Debug.Log($"[Server] Command received to push {target.name}");
-
-        if (netId.connectionToClient != null)
-        {
-            TargetApplyPush(netId.connectionToClient, dir.normalized * force);
-        }
-        else
-        {
-            Debug.LogWarning("[Server] No connectionToClient found on target!");
         }
     }
 
