@@ -21,6 +21,7 @@ public class PlayerMovement : NetworkBehaviour
 
     public float pushCooldown = 3;
     private float pushCurrCooldown = 0;
+    private float playerRange = 2;
 
     private float maxPlayerDist = 5;
     private float playerTpCooldown = 3;
@@ -69,12 +70,10 @@ public class PlayerMovement : NetworkBehaviour
             RaycastHit hit;
 
             // Use the custom physics scene to perform the raycast
-            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, 3f, LayerMask.GetMask("Player")))
+            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerRange, LayerMask.GetMask("Player")))
             {
-                NetworkIdentity identity = hit.transform.GetComponent<NetworkIdentity>();
                 if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
                 {
-                    // direction = transform.forward + Vector3.up * 0.05f;
                     CmdRequestPush(transform.position, transform.forward);
                     pushCurrCooldown = pushCooldown;
                 }
@@ -84,11 +83,10 @@ public class PlayerMovement : NetworkBehaviour
         {
             // On clients: use regular raycast
             Vector3 direction = transform.TransformDirection(Vector3.forward);
-            if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 3f, LayerMask.GetMask("Player")))
+            if (Physics.Raycast(transform.position, direction, out RaycastHit hit, playerRange, LayerMask.GetMask("Player")))
             {
                 if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
                 {
-                    // direction = transform.forward + Vector3.up * 0.05f;
                     CmdRequestPush(transform.position, transform.forward);
                     pushCurrCooldown = pushCooldown;
                 }
@@ -182,7 +180,7 @@ public class PlayerMovement : NetworkBehaviour
             return;
         }
 
-        if (serverScene.Raycast(origin, direction, out RaycastHit hit, 3f, LayerMask.GetMask("Player")))
+        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerRange, LayerMask.GetMask("Player")))
         {
             NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
             if (netId != null)
@@ -195,14 +193,14 @@ public class PlayerMovement : NetworkBehaviour
 
                 if (conn != null)
                 {
-                    targetMovement.TargetApplyPush(conn, direction.normalized * force);
+                    targetMovement.TargetApplyPush(conn, (transform.forward + Vector3.up * 0.5f).normalized * force);
                 }
                 else
                 {
                     Debug.Log("[Server] No connectionToClient — target is probably the host. Call directly.");
                     if (targetMovement.isLocalPlayer)
                     {
-                        targetMovement.ApplyPushDirectly(direction.normalized * force);
+                        targetMovement.ApplyPushDirectly((transform.forward + Vector3.up * 0.5f).normalized * force);
                     }
                 }
             }
