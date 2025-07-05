@@ -5,6 +5,7 @@ public class Button : MonoBehaviour
 {
     [SerializeField] Material buttonOnMat;
     [SerializeField] Material buttonOffMat;
+    [SerializeField] GameObject platform;
     MeshRenderer meshRenderer;
     private bool isOn = false;
 
@@ -20,6 +21,7 @@ public class Button : MonoBehaviour
         {
             isOn = true;
             meshRenderer.material = buttonOnMat;
+            platform.GetComponent<OneWayPlatform>().activate();
         }
     }
 }
