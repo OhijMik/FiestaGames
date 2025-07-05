@@ -128,45 +128,56 @@ public class PlayerMovement : NetworkBehaviour
             }
             rigidBody.MovePosition(rigidBody.position + movementVector);
 
-            GameObject nearestPlayer = FindNearestPlayer();
-            if (nearestPlayer != null && Vector3.Distance(transform.position + movementVector, nearestPlayer.transform.position) > maxPlayerDist)
+            GameObject furthestPlayer = FindFurthestPlayer();
+            if (furthestPlayer != null && Vector3.Distance(transform.position + movementVector, furthestPlayer.transform.position) > maxPlayerDist)
             {
                 playerTpCurrCooldown -= Time.deltaTime;
-                print(playerTpCurrCooldown);
             }
             else
             {
                 playerTpCurrCooldown = playerTpCooldown;
             }
 
-            if (transform.position.y < -50 || playerTpCurrCooldown <= 0)
+
+            if (playerTpCurrCooldown <= 0)
             {
                 foreach (GameObject player in players)
                 {
                     player.transform.position = spawnPoint;
                 }
             }
+            foreach (GameObject player in players)
+            {
+                if (player.transform.position.y < -30)
+                {
+                    foreach (GameObject p in players)
+                    {
+                        p.transform.position = spawnPoint;
+                    }
+                    break;
+                }
+            }
         }
     }
 
-    private GameObject FindNearestPlayer()
+    private GameObject FindFurthestPlayer()
     {
-        GameObject nearestPlayer = null;
-        float minDistance = float.MaxValue;
+        GameObject furthestPlayer = null;
+        float maxDistance = float.MinValue;
 
         foreach (GameObject player in players)
         {
             if (player != gameObject)
             {
                 float distance = Vector3.Distance(player.transform.position, transform.position);
-                if (distance < minDistance)
+                if (distance > maxDistance)
                 {
-                    minDistance = distance;
-                    nearestPlayer = player;
+                    maxDistance = distance;
+                    furthestPlayer = player;
                 }
             }
         }
-        return nearestPlayer;
+        return furthestPlayer;
     }
 
     [Command]
