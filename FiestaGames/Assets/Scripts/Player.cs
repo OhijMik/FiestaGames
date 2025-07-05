@@ -1,10 +1,5 @@
 using UnityEngine;
 using Mirror;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using System;
-using UnityEngine.SceneManagement;
-using System.Collections;
 
 public class PlayerMovement : NetworkBehaviour
 {
@@ -23,13 +18,15 @@ public class PlayerMovement : NetworkBehaviour
     private float pushCurrCooldown = 0;
     private float playerRange = 2;
 
-    private float maxPlayerDist = 5;
-    private float playerTpCooldown = 3;
-    private float playerTpCurrCooldown = 3;
+    private float maxPlayerDist = 10;
+    private float playerTpCooldown = 5;
+    private float playerTpCurrCooldown = 5;
 
     [SerializeField] Vector3 spawnPoint = new Vector3(0, 1, 0);
 
     GameObject[] players;
+
+    bool jump = false;
 
 
     void Awake()
@@ -52,7 +49,16 @@ public class PlayerMovement : NetworkBehaviour
             pushCurrCooldown = 0;
         }
 
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            jump = true;
+        }
+
         if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
+        {
+            rigidBody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
+        }
+        if (jump && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.01)
         {
             rigidBody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
         }
@@ -126,6 +132,7 @@ public class PlayerMovement : NetworkBehaviour
             if (nearestPlayer != null && Vector3.Distance(transform.position + movementVector, nearestPlayer.transform.position) > maxPlayerDist)
             {
                 playerTpCurrCooldown -= Time.deltaTime;
+                print(playerTpCurrCooldown);
             }
             else
             {
