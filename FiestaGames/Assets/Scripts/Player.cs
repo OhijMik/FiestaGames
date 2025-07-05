@@ -18,7 +18,7 @@ public class PlayerMovement : NetworkBehaviour
     private float pushCurrCooldown = 0;
     private float playerRange = 2;
 
-    private float maxPlayerDist = 10;
+    private float maxPlayerDist = 15;
     private float playerTpCooldown = 5;
     private float playerTpCurrCooldown = 5;
 
@@ -132,6 +132,7 @@ public class PlayerMovement : NetworkBehaviour
             if (furthestPlayer != null && Vector3.Distance(transform.position + movementVector, furthestPlayer.transform.position) > maxPlayerDist)
             {
                 playerTpCurrCooldown -= Time.deltaTime;
+                print(playerTpCurrCooldown);
             }
             else
             {
