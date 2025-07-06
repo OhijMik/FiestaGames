@@ -3,18 +3,20 @@ using UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
 {
-    [SerializeField] private Vector3 endpoint;
+    [SerializeField] private Vector3 endPoint;
     [SerializeField] private int speed = 1;
     [SerializeField] private bool activated = true;
     [SerializeField] private float moveDelay = 0;
+    [SerializeField] private bool stopAtStart = false;
+    [SerializeField] private bool stopAtEnd = false;
 
-    private Vector3 startpoint;
+    private Vector3 startPoint;
     private bool isForward = true;
     private float currMoveDelay;
 
     void Start()
     {
-        startpoint = transform.position;
+        startPoint = transform.position;
         currMoveDelay = moveDelay;
     }
 
@@ -23,20 +25,54 @@ public class MovingPlatform : MonoBehaviour
     {
         var step = speed * Time.deltaTime;
 
-        if (Vector3.Distance(transform.position, startpoint) < 0.001f && !isForward)
+        if (stopAtStart)
         {
-            currMoveDelay -= Time.deltaTime;
-            activated = false;
+            if (Vector3.Distance(transform.position, startPoint) < 0.001f && !isForward)
+            {
+                currMoveDelay -= Time.deltaTime;
+                activated = false;
+            }
+            else if (Vector3.Distance(transform.position, endPoint) < 0.001f && isForward)
+            {
+                isForward = !isForward;
+            }
+            else
+            {
+                currMoveDelay = moveDelay;
+            }
         }
-        else if (Vector3.Distance(transform.position, endpoint) < 0.001f && isForward)
+        else if (stopAtEnd)
         {
-            currMoveDelay -= Time.deltaTime;
-            activated = false;
+            if (Vector3.Distance(transform.position, startPoint) < 0.001f && !isForward)
+            {
+                isForward = !isForward;
+            }
+            else if (Vector3.Distance(transform.position, endPoint) < 0.001f && isForward)
+            {
+                currMoveDelay -= Time.deltaTime;
+                activated = false;
+            }
+            else
+            {
+                currMoveDelay = moveDelay;
+            }
         }
         else
         {
-            currMoveDelay = moveDelay;
-            activated = true;
+            if (Vector3.Distance(transform.position, startPoint) < 0.001f && !isForward)
+            {
+                currMoveDelay -= Time.deltaTime;
+                activated = false;
+            }
+            else if (Vector3.Distance(transform.position, endPoint) < 0.001f && isForward)
+            {
+                currMoveDelay -= Time.deltaTime;
+                activated = false;
+            }
+            else
+            {
+                currMoveDelay = moveDelay;
+            }
         }
 
         if (currMoveDelay < 0)
@@ -52,11 +88,11 @@ public class MovingPlatform : MonoBehaviour
 
         if (isForward)
         {
-            transform.position = Vector3.MoveTowards(transform.position, endpoint, step);
+            transform.position = Vector3.MoveTowards(transform.position, endPoint, step);
         }
         else
         {
-            transform.position = Vector3.MoveTowards(transform.position, startpoint, step);
+            transform.position = Vector3.MoveTowards(transform.position, startPoint, step);
         }
     }
 }
