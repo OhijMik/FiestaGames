@@ -22,8 +22,6 @@ public class PlayerMovement : NetworkBehaviour
     private float playerTpCooldown = 5;
     private float playerTpCurrCooldown = 5;
 
-    [SerializeField] Vector3 spawnPoint = new Vector3(0, 1, 0);
-
     GameObject[] players;
 
     bool jump = false;
@@ -139,6 +137,7 @@ public class PlayerMovement : NetworkBehaviour
                 playerTpCurrCooldown = playerTpCooldown;
             }
 
+            Vector3 spawnPoint = GameObject.FindGameObjectWithTag("SpawnPoint").transform.position;
 
             if (playerTpCurrCooldown <= 0)
             {
