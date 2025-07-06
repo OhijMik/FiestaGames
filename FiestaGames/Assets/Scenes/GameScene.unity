@@ -261,7 +261,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 88, y: 16, z: 30}
-  m_LocalScale: {x: 12, y: 10, z: 5}
+  m_LocalScale: {x: 12, y: 10, z: 6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1393955132}
@@ -370,7 +370,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 145202831768302395, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 29
+      value: 28.5
       objectReference: {fileID: 0}
     - target: {fileID: 145202831768302395, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -406,7 +406,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: moveDelay
-      value: 2
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: stopAtEnd
@@ -422,7 +422,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endPoint.z
-      value: 31
+      value: 31.5
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endpoint.x
@@ -447,6 +447,10 @@ PrefabInstance:
     - target: {fileID: 4694907298852956419, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_Name
       value: MovingPlatform (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4694907298852956419, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1700,7 +1704,7 @@ Transform:
   m_GameObject: {fileID: 1102782107}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 38.7, y: 21.5, z: 30}
+  m_LocalPosition: {x: 74.3, y: 21.5, z: 30}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2260,7 +2264,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1552009798
 Transform:
   m_ObjectHideFlags: 0
@@ -2344,7 +2348,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 145202831768302395, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 29
+      value: 31.5
       objectReference: {fileID: 0}
     - target: {fileID: 145202831768302395, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2380,7 +2384,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: moveDelay
-      value: 2
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: stopAtEnd
@@ -2396,7 +2400,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endPoint.z
-      value: 31
+      value: 28.5
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endpoint.x
@@ -2411,6 +2415,10 @@ PrefabInstance:
       value: 31
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
+      propertyPath: startDelay
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: startpoint.x
       value: 0
       objectReference: {fileID: 0}
@@ -2421,6 +2429,10 @@ PrefabInstance:
     - target: {fileID: 4694907298852956419, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_Name
       value: MovingPlatform (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4694907298852956419, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2741,7 +2753,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 145202831768302395, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 31
+      value: 31.5
       objectReference: {fileID: 0}
     - target: {fileID: 145202831768302395, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2777,7 +2789,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: moveDelay
-      value: 2
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endPoint.x
@@ -2789,7 +2801,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endPoint.z
-      value: 29
+      value: 28.5
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endpoint.x
@@ -2818,6 +2830,10 @@ PrefabInstance:
     - target: {fileID: 4694907298852956419, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_Name
       value: MovingPlatform (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4694907298852956419, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2927,7 +2943,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 145202831768302395, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 31
+      value: 31.5
       objectReference: {fileID: 0}
     - target: {fileID: 145202831768302395, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2963,7 +2979,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: moveDelay
-      value: 2
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endPoint.x
@@ -2975,7 +2991,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endPoint.z
-      value: 29
+      value: 28.5
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endpoint.x
@@ -2988,6 +3004,10 @@ PrefabInstance:
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: endpoint.z
       value: 29
+      objectReference: {fileID: 0}
+    - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
+      propertyPath: startDelay
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1700483134505066565, guid: 241805d9179ed494b8a5f114c0f213a3, type: 3}
       propertyPath: stopAtStart

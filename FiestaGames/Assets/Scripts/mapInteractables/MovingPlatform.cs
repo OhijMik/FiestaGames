@@ -6,6 +6,7 @@ public class MovingPlatform : MonoBehaviour
     [SerializeField] private Vector3 endPoint;
     [SerializeField] private int speed = 1;
     [SerializeField] private bool activated = true;
+    [SerializeField] private float startDelay = 0;
     [SerializeField] private float moveDelay = 0;
     [SerializeField] private bool stopAtStart = false;
     [SerializeField] private bool stopAtEnd = false;
@@ -24,6 +25,12 @@ public class MovingPlatform : MonoBehaviour
     void Update()
     {
         var step = speed * Time.deltaTime;
+
+        if (startDelay >= 0)
+        {
+            startDelay -= Time.deltaTime;
+            return;
+        }
 
         if (stopAtStart)
         {
