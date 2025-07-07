@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6474672170506376655}
   - component: {fileID: 3090757702994370777}
   m_Layer: 0
-  m_Name: Button
+  m_Name: ButtonPress
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -123,6 +123,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buttonOnMat: {fileID: 2100000, guid: eee3f8de5e339c147b46766627acb731, type: 2}
   buttonOffMat: {fileID: 2100000, guid: 8ea12f443b64b0048857330c8bb3aa44, type: 2}
+  platform: {fileID: 0}
 --- !u!1 &5109633058569049526
 GameObject:
   m_ObjectHideFlags: 0
@@ -136,7 +137,7 @@ GameObject:
   - component: {fileID: 3623774509804044909}
   - component: {fileID: 818925927042335636}
   m_Layer: 0
-  m_Name: ButtonBase
+  m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -151,7 +152,7 @@ Transform:
   m_GameObject: {fileID: 5109633058569049526}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 71.5, y: 20.57, z: 31.11}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1.5, y: 0.25, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children:

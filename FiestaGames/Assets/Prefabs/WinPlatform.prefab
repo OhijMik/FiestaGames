@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6474672170506376655}
   - component: {fileID: 2596884214372169461}
   m_Layer: 0
-  m_Name: WinPlatform
+  m_Name: WinPlatformPress
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 3623774509804044909}
   - component: {fileID: 818925927042335636}
   m_Layer: 0
-  m_Name: WinPlatformBase
+  m_Name: WinPlatform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
