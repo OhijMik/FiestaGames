@@ -226,8 +226,9 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   walkingSpeed: 7
-  runningSpeed: 12
-  jumpForce: 13
+  runningSpeed: 10
+  jumpForce: 10
+  soloJumpForce: 15
   rotationSpeed: 200
   force: 20
   pushCooldown: 3

@@ -6,8 +6,9 @@ public class PlayerMovement : NetworkBehaviour
     private Rigidbody rigidBody;
 
     public float walkingSpeed = 7f;
-    public float runningSpeed = 12f;
+    public float runningSpeed = 10f;
     public float jumpForce = 10.0f;
+    public float soloJumpForce = 15.0f;
     public float rotationSpeed = 200.0f;
     public float force = 20f;
 
@@ -50,6 +51,11 @@ public class PlayerMovement : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.B))
         {
             jump = true;
+        }
+
+        if (players.Length == 1)
+        {
+            jumpForce = soloJumpForce;
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
