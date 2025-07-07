@@ -3342,6 +3342,7 @@ GameObject:
   - component: {fileID: 2054559942}
   - component: {fileID: 2054559944}
   - component: {fileID: 2054559943}
+  - component: {fileID: 2054559945}
   m_Layer: 5
   m_Name: PlayerTpCooldown
   m_TagString: Untagged
@@ -3467,6 +3468,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2054559941}
   m_CullTransparentMesh: 1
+--- !u!114 &2054559945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2054559941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e06a9d83aec9d949bd6ab3ae5ae1e8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2055684972
 PrefabInstance:
   m_ObjectHideFlags: 0

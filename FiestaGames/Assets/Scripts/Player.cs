@@ -1,7 +1,7 @@
 using UnityEngine;
 using Mirror;
 
-public class PlayerMovement : NetworkBehaviour
+public class Player : NetworkBehaviour
 {
     private Rigidbody rigidBody;
 
@@ -20,7 +20,7 @@ public class PlayerMovement : NetworkBehaviour
     private float playerRange = 2;
 
     private float maxPlayerDist = 15;
-    private float playerTpCooldown = 5;
+    public float playerTpCooldown = 5;
     private float playerTpCurrCooldown = 5;
 
     GameObject[] players;
@@ -136,7 +136,6 @@ public class PlayerMovement : NetworkBehaviour
             if (furthestPlayer != null && Vector3.Distance(transform.position + movementVector, furthestPlayer.transform.position) > maxPlayerDist)
             {
                 playerTpCurrCooldown -= Time.deltaTime;
-                print(playerTpCurrCooldown);
             }
             else
             {
@@ -210,7 +209,7 @@ public class PlayerMovement : NetworkBehaviour
             if (netId != null)
             {
                 GameObject target = netId.gameObject;
-                PlayerMovement targetMovement = target.GetComponent<PlayerMovement>();
+                Player targetMovement = target.GetComponent<Player>();
 
                 // Get the correct connection
                 NetworkConnectionToClient conn = netId.connectionToClient;
@@ -257,6 +256,11 @@ public class PlayerMovement : NetworkBehaviour
         {
             rb.AddForce(force, ForceMode.Impulse);
         }
+    }
+
+    public float getPlayerTpCurrCooldown()
+    {
+        return playerTpCurrCooldown;
     }
 
 }
