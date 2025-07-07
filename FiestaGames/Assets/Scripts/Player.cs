@@ -53,18 +53,20 @@ public class Player : NetworkBehaviour
             jump = true;
         }
 
+        float currJumpForce = jumpForce;
+
         if (players.Length == 1)
         {
-            jumpForce = soloJumpForce;
+            currJumpForce = soloJumpForce;
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
         {
-            rigidBody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
+            rigidBody.AddForce(currJumpForce * Vector3.up, ForceMode.Impulse);
         }
         if (jump && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.01)
         {
-            rigidBody.AddForce(jumpForce * Vector3.up, ForceMode.Impulse);
+            rigidBody.AddForce(currJumpForce * Vector3.up, ForceMode.Impulse);
         }
 
         if (NetworkServer.active)

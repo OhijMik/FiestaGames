@@ -19,7 +19,8 @@ public class PlayerTPCooldownText : MonoBehaviour
         {
             return;
         }
-        float minTime = players[0].GetComponent<Player>().playerTpCooldown;
+        float initTime = players[0].GetComponent<Player>().playerTpCooldown;
+        float minTime = initTime;
         foreach (GameObject player in players)
         {
             if (player.GetComponent<Player>().getPlayerTpCurrCooldown() < minTime)
@@ -27,9 +28,11 @@ public class PlayerTPCooldownText : MonoBehaviour
                 minTime = player.GetComponent<Player>().getPlayerTpCurrCooldown();
             }
         }
-        if (minTime != players[0].GetComponent<Player>().playerTpCooldown)
+        if (minTime != initTime)
         {
             tMPro.text = minTime.ToString("F1");
+            byte ratio = (byte)(minTime / initTime * 255);
+            tMPro.color = new Color32(255, ratio, ratio, 255);
         }
         else
         {
