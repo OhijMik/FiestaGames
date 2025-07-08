@@ -17,7 +17,9 @@ public class Player : NetworkBehaviour
 
     public float pushCooldown = 3;
     private float pushCurrCooldown = 0;
-    private float playerRange = 2;
+    private float playerPushRange = 2;
+
+    private float playerPullRange = 2;
 
     private float maxPlayerDist = 15;
     public float playerTpCooldown = 5;
@@ -82,7 +84,7 @@ public class Player : NetworkBehaviour
             RaycastHit hit;
 
             // Use the custom physics scene to perform the raycast
-            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerRange, LayerMask.GetMask("Player")))
+            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPushRange, LayerMask.GetMask("Player")))
             {
                 if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
                 {
@@ -95,7 +97,7 @@ public class Player : NetworkBehaviour
         {
             // On clients: use regular raycast
             Vector3 direction = transform.TransformDirection(Vector3.forward);
-            if (Physics.Raycast(transform.position, direction, out RaycastHit hit, playerRange, LayerMask.GetMask("Player")))
+            if (Physics.Raycast(transform.position, direction, out RaycastHit hit, playerPushRange, LayerMask.GetMask("Player")))
             {
                 if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
                 {
@@ -205,7 +207,7 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerRange, LayerMask.GetMask("Player")))
+        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerPushRange, LayerMask.GetMask("Player")))
         {
             NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
             if (netId != null)
