@@ -86,10 +86,18 @@ public class Player : NetworkBehaviour
             // Use the custom physics scene to perform the raycast
             if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPushRange, LayerMask.GetMask("Player")))
             {
-                if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
+                if (Input.GetKey(KeyCode.Mouse0) && pushCurrCooldown == 0)
                 {
                     CmdRequestPush(transform.position, transform.forward);
                     pushCurrCooldown = pushCooldown;
+                }
+            }
+
+            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPullRange, LayerMask.GetMask("Player")))
+            {
+                if (Input.GetKey(KeyCode.Mouse1))
+                {
+                    CmdRequestPull(transform.position, transform.forward);
                 }
             }
         }
@@ -99,10 +107,18 @@ public class Player : NetworkBehaviour
             Vector3 direction = transform.TransformDirection(Vector3.forward);
             if (Physics.Raycast(transform.position, direction, out RaycastHit hit, playerPushRange, LayerMask.GetMask("Player")))
             {
-                if (Input.GetKey(KeyCode.E) && pushCurrCooldown == 0)
+                if (Input.GetKey(KeyCode.Mouse0) && pushCurrCooldown == 0)
                 {
                     CmdRequestPush(transform.position, transform.forward);
                     pushCurrCooldown = pushCooldown;
+                }
+            }
+
+            if (Physics.Raycast(transform.position, direction, out hit, playerPullRange, LayerMask.GetMask("Player")))
+            {
+                if (Input.GetKey(KeyCode.Mouse1))
+                {
+                    CmdRequestPull(transform.position, transform.forward);
                 }
             }
         }
@@ -253,6 +269,80 @@ public class Player : NetworkBehaviour
     }
 
     public void ApplyPushDirectly(Vector3 force)
+    {
+        Debug.Log("[Host] Applying push directly");
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.AddForce(force, ForceMode.Impulse);
+        }
+    }
+
+
+    [Command]
+    void CmdRequestPull(Vector3 origin, Vector3 direction)
+    {
+        PhysicsSim sim = FindObjectOfType<PhysicsSim>();
+        if (sim == null)
+        {
+            Debug.LogError("No PhysicsSim found on server!");
+            return;
+        }
+
+        PhysicsScene serverScene = sim.GetScene();
+
+        if (!serverScene.IsValid())
+        {
+            Debug.LogError("Invalid server physics scene");
+            return;
+        }
+
+        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerPullRange, LayerMask.GetMask("Player")))
+        {
+            NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
+            if (netId != null)
+            {
+                GameObject target = netId.gameObject;
+                Player targetMovement = target.GetComponent<Player>();
+
+                // Get the correct connection
+                NetworkConnectionToClient conn = netId.connectionToClient;
+
+                if (conn != null)
+                {
+                    targetMovement.TargetApplyPull(conn, transform.forward * force);
+                }
+                else
+                {
+                    Debug.Log("[Server] No connectionToClient — target is probably the host. Call directly.");
+                    if (targetMovement.isLocalPlayer)
+                    {
+                        targetMovement.ApplyPullDirectly(transform.forward * force);
+                    }
+                }
+            }
+        }
+    }
+
+    [TargetRpc]
+    public void TargetApplyPull(NetworkConnection target, Vector3 force)
+    {
+        // This runs only on the target client, including host
+        if (!isLocalPlayer)
+        {
+            Debug.Log("[Client] Skipping push: not local player");
+            return;
+        }
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            Debug.Log("[Client] Applying push from server");
+            rb.AddForce(force, ForceMode.Impulse);
+        }
+    }
+
+    public void ApplyPullDirectly(Vector3 force)
     {
         Debug.Log("[Host] Applying push directly");
         Rigidbody rb = GetComponent<Rigidbody>();
