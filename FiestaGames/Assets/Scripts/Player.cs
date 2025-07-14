@@ -98,6 +98,7 @@ public class Player : NetworkBehaviour
                 if (Input.GetKey(KeyCode.Mouse1))
                 {
                     CmdRequestPull(transform.position, transform.forward);
+                    // GameObject pulledPlayer = hit.collider.gameObject;
                 }
             }
         }
@@ -310,14 +311,14 @@ public class Player : NetworkBehaviour
 
                 if (conn != null)
                 {
-                    targetMovement.TargetApplyPull(conn, transform.forward * force);
+                    targetMovement.TargetApplyPull(conn, transform.position + transform.forward);
                 }
                 else
                 {
                     Debug.Log("[Server] No connectionToClient — target is probably the host. Call directly.");
                     if (targetMovement.isLocalPlayer)
                     {
-                        targetMovement.ApplyPullDirectly(transform.forward * force);
+                        targetMovement.ApplyPullDirectly(transform.position + transform.forward);
                     }
                 }
             }
@@ -325,30 +326,30 @@ public class Player : NetworkBehaviour
     }
 
     [TargetRpc]
-    public void TargetApplyPull(NetworkConnection target, Vector3 force)
+    public void TargetApplyPull(NetworkConnection target, Vector3 pullPos)
     {
         // This runs only on the target client, including host
         if (!isLocalPlayer)
         {
-            Debug.Log("[Client] Skipping push: not local player");
+            Debug.Log("[Client] Skipping pull: not local player");
             return;
         }
 
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
-            Debug.Log("[Client] Applying push from server");
-            rb.AddForce(force, ForceMode.Impulse);
+            Debug.Log("[Client] Applying pull from server");
+            rb.transform.position = pullPos;
         }
     }
 
-    public void ApplyPullDirectly(Vector3 force)
+    public void ApplyPullDirectly(Vector3 pullPos)
     {
-        Debug.Log("[Host] Applying push directly");
+        Debug.Log("[Host] Applying pull directly");
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.AddForce(force, ForceMode.Impulse);
+            rb.transform.position = pullPos;
         }
     }
 
