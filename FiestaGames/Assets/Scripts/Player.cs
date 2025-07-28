@@ -98,7 +98,6 @@ public class Player : NetworkBehaviour
                 if (Input.GetKey(KeyCode.Mouse1))
                 {
                     CmdRequestPull(transform.position, transform.forward);
-                    // GameObject pulledPlayer = hit.collider.gameObject;
                 }
             }
         }

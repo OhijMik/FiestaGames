@@ -9,12 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3750898347954278908}
-  - component: {fileID: 4717415634014137131}
   - component: {fileID: 5167482428692739962}
   - component: {fileID: 3164882378828868273}
   - component: {fileID: 3068769804102721967}
   - component: {fileID: 8026076566846480758}
-  - component: {fileID: 2519074644733200592}
+  - component: {fileID: 743989868846963261}
+  - component: {fileID: 4471955577224596329}
   m_Layer: 0
   m_Name: MovableObject
   m_TagString: Untagged
@@ -37,23 +37,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4717415634014137131
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8228904982954456984}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  _assetId: 1584039994
-  serverOnly: 0
-  visibility: 0
-  hasSpawned: 0
 --- !u!33 &5167482428692739962
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -155,7 +138,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &2519074644733200592
+--- !u!114 &743989868846963261
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -189,3 +172,20 @@ MonoBehaviour:
   rotationSensitivity: 0.01
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &4471955577224596329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8228904982954456984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 1584039994
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
