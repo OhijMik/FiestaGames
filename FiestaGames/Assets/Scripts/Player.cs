@@ -7,10 +7,11 @@ public class Player : NetworkBehaviour
 
     public float walkingSpeed = 7f;
     public float runningSpeed = 10f;
-    public float jumpForce = 10.0f;
+    public float jumpForce = 12.0f;
     public float soloJumpForce = 15.0f;
     public float rotationSpeed = 200.0f;
     public float force = 20f;
+    public float objectPushForce = 5;
 
     private float inputX;
     private float inputY;
@@ -83,8 +84,10 @@ public class Player : NetworkBehaviour
             Ray ray = new Ray(origin, direction);
             RaycastHit hit;
 
+            int layerMask = LayerMask.GetMask("Player", "Movable");
+
             // Use the custom physics scene to perform the raycast
-            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPushRange, LayerMask.GetMask("Player")))
+            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPushRange, layerMask))
             {
                 if (Input.GetKey(KeyCode.Mouse0) && pushCurrCooldown == 0)
                 {
@@ -93,24 +96,11 @@ public class Player : NetworkBehaviour
                 }
             }
 
-            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPullRange, LayerMask.GetMask("Player")))
+            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPullRange, layerMask))
             {
                 if (Input.GetKey(KeyCode.Mouse1))
                 {
                     CmdRequestPull(transform.position, transform.forward);
-                }
-            }
-
-            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPullRange, LayerMask.GetMask("Movable")))
-            {
-                if (Input.GetKey(KeyCode.Mouse1))
-                {
-                    NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
-                    if (netId != null)
-                    {
-                        GameObject target = netId.gameObject;
-                        target.transform.position = transform.position + transform.forward;
-                    }
                 }
             }
         }
@@ -118,7 +108,9 @@ public class Player : NetworkBehaviour
         {
             // On clients: use regular raycast
             Vector3 direction = transform.TransformDirection(Vector3.forward);
-            if (Physics.Raycast(transform.position, direction, out RaycastHit hit, playerPushRange, LayerMask.GetMask("Player")))
+            int layerMask = LayerMask.GetMask("Player", "Movable");
+
+            if (Physics.Raycast(transform.position, direction, out RaycastHit hit, playerPushRange, layerMask))
             {
                 if (Input.GetKey(KeyCode.Mouse0) && pushCurrCooldown == 0)
                 {
@@ -127,24 +119,11 @@ public class Player : NetworkBehaviour
                 }
             }
 
-            if (Physics.Raycast(transform.position, direction, out hit, playerPullRange, LayerMask.GetMask("Player")))
+            if (Physics.Raycast(transform.position, direction, out hit, playerPullRange, layerMask))
             {
                 if (Input.GetKey(KeyCode.Mouse1))
                 {
                     CmdRequestPull(transform.position, transform.forward);
-                }
-            }
-
-            if (Physics.Raycast(transform.position, direction, out hit, playerPullRange, LayerMask.GetMask("Movable")))
-            {
-                if (Input.GetKey(KeyCode.Mouse1))
-                {
-                    NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
-                    if (netId != null)
-                    {
-                        GameObject target = netId.gameObject;
-                        target.transform.position = transform.position + transform.forward;
-                    }
                 }
             }
         }
@@ -274,10 +253,33 @@ public class Player : NetworkBehaviour
                 }
             }
         }
+
+        if (serverScene.Raycast(origin, direction, out hit, playerPushRange, LayerMask.GetMask("Movable")))
+        {
+            NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
+            if (netId != null)
+            {
+                GameObject target = netId.gameObject;
+                MovableObject targetMovement = target.GetComponent<MovableObject>();
+
+                // Get the correct connection
+                NetworkConnectionToClient conn = netId.connectionToClient;
+
+                if (conn != null)
+                {
+                    targetMovement.TargetApplyPush(conn, (transform.forward + Vector3.up * 0.5f).normalized * objectPushForce);
+                }
+                else
+                {
+                    Debug.Log("[Server] No connectionToClient — target is probably the host. Call directly.");
+                    targetMovement.ApplyPushDirectly((transform.forward + Vector3.up * 0.5f).normalized * objectPushForce);
+                }
+            }
+        }
     }
 
     [TargetRpc]
-    public void TargetApplyPush(NetworkConnection target, Vector3 force)
+    public void TargetApplyPush(NetworkConnection target, Vector3 pushForce)
     {
         // This runs only on the target client, including host
         if (!isLocalPlayer)
@@ -290,17 +292,17 @@ public class Player : NetworkBehaviour
         if (rb != null)
         {
             Debug.Log("[Client] Applying push from server");
-            rb.AddForce(force, ForceMode.Impulse);
+            rb.AddForce(pushForce, ForceMode.Impulse);
         }
     }
 
-    public void ApplyPushDirectly(Vector3 force)
+    public void ApplyPushDirectly(Vector3 pushForce)
     {
         Debug.Log("[Host] Applying push directly");
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.AddForce(force, ForceMode.Impulse);
+            rb.AddForce(pushForce, ForceMode.Impulse);
         }
     }
 
@@ -345,6 +347,29 @@ public class Player : NetworkBehaviour
                     {
                         targetMovement.ApplyPullDirectly(transform.position + transform.forward);
                     }
+                }
+            }
+        }
+
+        if (serverScene.Raycast(origin, direction, out hit, playerPullRange, LayerMask.GetMask("Movable")))
+        {
+            NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
+            if (netId != null)
+            {
+                GameObject target = netId.gameObject;
+                MovableObject targetMovement = target.GetComponent<MovableObject>();
+
+                // Get the correct connection
+                NetworkConnectionToClient conn = netId.connectionToClient;
+
+                if (conn != null)
+                {
+                    targetMovement.TargetApplyPull(conn, transform.position + transform.forward);
+                }
+                else
+                {
+                    Debug.Log("[Server] No connectionToClient — target is probably the host. Call directly.");
+                    targetMovement.ApplyPullDirectly(transform.position + transform.forward);
                 }
             }
         }

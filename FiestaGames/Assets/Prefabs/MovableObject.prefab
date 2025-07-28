@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8026076566846480758}
   - component: {fileID: 743989868846963261}
   - component: {fileID: 4471955577224596329}
+  - component: {fileID: 8240878918362826929}
   m_Layer: 3
   m_Name: MovableObject
   m_TagString: Untagged
@@ -189,3 +190,18 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
+--- !u!114 &8240878918362826929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8228904982954456984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad5dc485f4e991d48b58aed6f525fc97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
