@@ -19,7 +19,7 @@ public class Player : NetworkBehaviour
     private float pushCurrCooldown = 0;
     private float playerPushRange = 2;
 
-    private float playerPullRange = 1;
+    private float playerPullRange = 2;
 
     private float maxPlayerDist = 15;
     public float playerTpCooldown = 5;
@@ -83,10 +83,14 @@ public class Player : NetworkBehaviour
             Ray ray = new Ray(origin, direction);
             RaycastHit hit;
 
+            Vector3 point1 = transform.position + Vector3.up * 0.25f; // top of capsule
+            Vector3 point2 = transform.position - Vector3.up * 0.25f; // bottom of capsule
+            float radius = 0.25f;
+
             int layerMask = LayerMask.GetMask("Player", "Movable");
 
             // Use the custom physics scene to perform the raycast
-            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPushRange, layerMask))
+            if (currentPhysicsScene.CapsuleCast(point1, point2, radius, ray.direction, out hit, playerPushRange, layerMask))
             {
                 if (Input.GetKey(KeyCode.Mouse0) && pushCurrCooldown == 0)
                 {
@@ -95,7 +99,7 @@ public class Player : NetworkBehaviour
                 }
             }
 
-            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPullRange, layerMask))
+            if (currentPhysicsScene.CapsuleCast(point1, point2, radius, ray.direction, out hit, playerPullRange, layerMask))
             {
                 if (Input.GetKey(KeyCode.Mouse1))
                 {
@@ -107,9 +111,13 @@ public class Player : NetworkBehaviour
         {
             // On clients: use regular raycast
             Vector3 direction = transform.TransformDirection(Vector3.forward);
+            Vector3 point1 = transform.position + Vector3.up * 0.25f; // top of capsule
+            Vector3 point2 = transform.position - Vector3.up * 0.25f; // bottom of capsule
+            float radius = 0.25f;
+
             int layerMask = LayerMask.GetMask("Player", "Movable");
 
-            if (Physics.Raycast(transform.position, direction, out RaycastHit hit, playerPushRange, layerMask))
+            if (Physics.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, playerPushRange, layerMask))
             {
                 if (Input.GetKey(KeyCode.Mouse0) && pushCurrCooldown == 0)
                 {
@@ -118,7 +126,7 @@ public class Player : NetworkBehaviour
                 }
             }
 
-            if (Physics.Raycast(transform.position, direction, out hit, playerPullRange, layerMask))
+            if (Physics.CapsuleCast(point1, point2, radius, direction, out hit, playerPullRange, layerMask))
             {
                 if (Input.GetKey(KeyCode.Mouse1))
                 {
@@ -229,7 +237,11 @@ public class Player : NetworkBehaviour
 
         int layerMask = LayerMask.GetMask("Player", "Movable");
 
-        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerPushRange, layerMask))
+        Vector3 point1 = transform.position + Vector3.up * 0.25f; // top of capsule
+        Vector3 point2 = transform.position - Vector3.up * 0.25f; // bottom of capsule
+        float radius = 0.25f;
+
+        if (serverScene.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, playerPushRange, layerMask))
         {
             NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
             if (netId != null)
@@ -274,7 +286,11 @@ public class Player : NetworkBehaviour
 
         int layerMask = LayerMask.GetMask("Player", "Movable");
 
-        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerPullRange, layerMask))
+        Vector3 point1 = transform.position + Vector3.up * 0.25f; // top of capsule
+        Vector3 point2 = transform.position - Vector3.up * 0.25f; // bottom of capsule
+        float radius = 0.25f;
+
+        if (serverScene.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, playerPullRange, layerMask))
         {
             NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
             if (netId != null)
@@ -287,11 +303,11 @@ public class Player : NetworkBehaviour
 
                 if (conn != null)
                 {
-                    targetMovement.TargetApplyPull(conn, transform.position + transform.forward * 1.1f);
+                    targetMovement.TargetApplyPull(conn, transform.position + transform.forward * 1.5f);
                 }
                 else
                 {
-                    targetMovement.ApplyPullDirectly(transform.position + transform.forward * 1.1f);
+                    targetMovement.ApplyPullDirectly(transform.position + transform.forward * 1.5f);
                 }
             }
         }
