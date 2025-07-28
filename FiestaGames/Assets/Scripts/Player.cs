@@ -1,5 +1,6 @@
 using UnityEngine;
 using Mirror;
+using Steamworks;
 
 public class Player : NetworkBehaviour
 {
@@ -29,6 +30,8 @@ public class Player : NetworkBehaviour
 
     bool jump = false;
 
+    GameObject pulling;
+
 
     void Awake()
     {
@@ -50,25 +53,9 @@ public class Player : NetworkBehaviour
             pushCurrCooldown = 0;
         }
 
-        if (Input.GetKeyDown(KeyCode.B))
+        if (Input.GetKeyUp(KeyCode.Mouse1))
         {
-            jump = true;
-        }
-
-        float currJumpForce = jumpForce;
-
-        if (players.Length == 1)
-        {
-            currJumpForce = soloJumpForce;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
-        {
-            rigidBody.AddForce(currJumpForce * Vector3.up, ForceMode.Impulse);
-        }
-        if (jump && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.01)
-        {
-            rigidBody.AddForce(currJumpForce * Vector3.up, ForceMode.Impulse);
+            pulling = null;
         }
 
         if (NetworkServer.active)
@@ -83,9 +70,9 @@ public class Player : NetworkBehaviour
             Ray ray = new Ray(origin, direction);
             RaycastHit hit;
 
-            Vector3 point1 = transform.position + Vector3.up * 0.25f; // top of capsule
-            Vector3 point2 = transform.position - Vector3.up * 0.25f; // bottom of capsule
-            float radius = 0.25f;
+            Vector3 point1 = transform.position + Vector3.up * 0.5f; // top of capsule
+            Vector3 point2 = transform.position - Vector3.up * 0.5f; // bottom of capsule
+            float radius = 0.5f;
 
             int layerMask = LayerMask.GetMask("Player", "Movable");
 
@@ -101,9 +88,10 @@ public class Player : NetworkBehaviour
 
             if (currentPhysicsScene.CapsuleCast(point1, point2, radius, ray.direction, out hit, playerPullRange, layerMask))
             {
-                if (Input.GetKey(KeyCode.Mouse1))
+                if ((hit.transform.gameObject == pulling || !pulling) && Input.GetKey(KeyCode.Mouse1))
                 {
                     CmdRequestPull(transform.position, transform.forward);
+                    pulling = hit.transform.gameObject;
                 }
             }
         }
@@ -111,9 +99,9 @@ public class Player : NetworkBehaviour
         {
             // On clients: use regular raycast
             Vector3 direction = transform.TransformDirection(Vector3.forward);
-            Vector3 point1 = transform.position + Vector3.up * 0.25f; // top of capsule
-            Vector3 point2 = transform.position - Vector3.up * 0.25f; // bottom of capsule
-            float radius = 0.25f;
+            Vector3 point1 = transform.position + Vector3.up * 0.5f; // top of capsule
+            Vector3 point2 = transform.position - Vector3.up * 0.5f; // bottom of capsule
+            float radius = 0.5f;
 
             int layerMask = LayerMask.GetMask("Player", "Movable");
 
@@ -128,9 +116,10 @@ public class Player : NetworkBehaviour
 
             if (Physics.CapsuleCast(point1, point2, radius, direction, out hit, playerPullRange, layerMask))
             {
-                if (Input.GetKey(KeyCode.Mouse1))
+                if ((hit.transform.gameObject == pulling || !pulling) && Input.GetKey(KeyCode.Mouse1))
                 {
                     CmdRequestPull(transform.position, transform.forward);
+                    pulling = hit.transform.gameObject;
                 }
             }
         }
@@ -144,6 +133,23 @@ public class Player : NetworkBehaviour
         if (isLocalPlayer == true)
         {
             players = GameObject.FindGameObjectsWithTag("Player");
+
+            // Player jump
+            float currJumpForce = jumpForce;
+
+            if (players.Length == 1)
+            {
+                currJumpForce = soloJumpForce;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.05)
+            {
+                rigidBody.AddForce(currJumpForce * Vector3.up, ForceMode.Impulse);
+            }
+            if (jump && Mathf.Abs(rigidBody.linearVelocity.y) <= 0.01)
+            {
+                rigidBody.AddForce(currJumpForce * Vector3.up, ForceMode.Impulse);
+            }
 
             // Rotate the character
             transform.Rotate(0, inputX * rotationSpeed * Time.deltaTime, 0);
@@ -237,9 +243,9 @@ public class Player : NetworkBehaviour
 
         int layerMask = LayerMask.GetMask("Player", "Movable");
 
-        Vector3 point1 = transform.position + Vector3.up * 0.25f; // top of capsule
-        Vector3 point2 = transform.position - Vector3.up * 0.25f; // bottom of capsule
-        float radius = 0.25f;
+        Vector3 point1 = transform.position + Vector3.up * 0.5f; // top of capsule
+        Vector3 point2 = transform.position - Vector3.up * 0.5f; // bottom of capsule
+        float radius = 0.5f;
 
         if (serverScene.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, playerPushRange, layerMask))
         {
@@ -286,9 +292,9 @@ public class Player : NetworkBehaviour
 
         int layerMask = LayerMask.GetMask("Player", "Movable");
 
-        Vector3 point1 = transform.position + Vector3.up * 0.25f; // top of capsule
-        Vector3 point2 = transform.position - Vector3.up * 0.25f; // bottom of capsule
-        float radius = 0.25f;
+        Vector3 point1 = transform.position + Vector3.up * 0.5f; // top of capsule
+        Vector3 point2 = transform.position - Vector3.up * 0.5f; // bottom of capsule
+        float radius = 0.5f;
 
         if (serverScene.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, playerPullRange, layerMask))
         {
