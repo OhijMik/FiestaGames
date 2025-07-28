@@ -186,6 +186,7 @@ GameObject:
   - component: {fileID: 7424169970684692394}
   - component: {fileID: 8228400338300235979}
   - component: {fileID: 1677651873101823949}
+  - component: {fileID: 5190232345091917615}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -227,11 +228,13 @@ MonoBehaviour:
   syncInterval: 0
   walkingSpeed: 7
   runningSpeed: 10
-  jumpForce: 10
+  jumpForce: 13
   soloJumpForce: 15
   rotationSpeed: 200
   force: 20
+  objectPushForce: 5
   pushCooldown: 3
+  playerTpCooldown: 5
 --- !u!114 &2428353295854451999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -331,3 +334,18 @@ MonoBehaviour:
   rotationSensitivity: 0.01
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &5190232345091917615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7756159021856399429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad5dc485f4e991d48b58aed6f525fc97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0

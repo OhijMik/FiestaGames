@@ -7,13 +7,6 @@ public class MovableObject : NetworkBehaviour
     [TargetRpc]
     public void TargetApplyPush(NetworkConnection target, Vector3 pushForce)
     {
-        // This runs only on the target client, including host
-        if (!isLocalPlayer)
-        {
-            Debug.Log("[Client] Skipping push: not local player");
-            return;
-        }
-
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -35,13 +28,6 @@ public class MovableObject : NetworkBehaviour
     [TargetRpc]
     public void TargetApplyPull(NetworkConnection target, Vector3 pullPos)
     {
-        // This runs only on the target client, including host
-        if (!isLocalPlayer)
-        {
-            Debug.Log("[Client] Skipping pull: not local player");
-            return;
-        }
-
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {

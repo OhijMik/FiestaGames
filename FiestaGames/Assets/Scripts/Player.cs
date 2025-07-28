@@ -11,7 +11,6 @@ public class Player : NetworkBehaviour
     public float soloJumpForce = 15.0f;
     public float rotationSpeed = 200.0f;
     public float force = 20f;
-    public float objectPushForce = 5;
 
     private float inputX;
     private float inputY;
@@ -228,33 +227,9 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerPushRange, LayerMask.GetMask("Player")))
-        {
-            NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
-            if (netId != null)
-            {
-                GameObject target = netId.gameObject;
-                Player targetMovement = target.GetComponent<Player>();
+        int layerMask = LayerMask.GetMask("Player", "Movable");
 
-                // Get the correct connection
-                NetworkConnectionToClient conn = netId.connectionToClient;
-
-                if (conn != null)
-                {
-                    targetMovement.TargetApplyPush(conn, (transform.forward + Vector3.up * 0.5f).normalized * force);
-                }
-                else
-                {
-                    Debug.Log("[Server] No connectionToClient — target is probably the host. Call directly.");
-                    if (targetMovement.isLocalPlayer)
-                    {
-                        targetMovement.ApplyPushDirectly((transform.forward + Vector3.up * 0.5f).normalized * force);
-                    }
-                }
-            }
-        }
-
-        if (serverScene.Raycast(origin, direction, out hit, playerPushRange, LayerMask.GetMask("Movable")))
+        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerPushRange, layerMask))
         {
             NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
             if (netId != null)
@@ -267,42 +242,14 @@ public class Player : NetworkBehaviour
 
                 if (conn != null)
                 {
-                    targetMovement.TargetApplyPush(conn, (transform.forward + Vector3.up * 0.5f).normalized * objectPushForce);
+                    targetMovement.TargetApplyPush(conn, (transform.forward + Vector3.up * 0.5f).normalized * force);
                 }
                 else
                 {
                     Debug.Log("[Server] No connectionToClient — target is probably the host. Call directly.");
-                    targetMovement.ApplyPushDirectly((transform.forward + Vector3.up * 0.5f).normalized * objectPushForce);
+                    targetMovement.ApplyPushDirectly((transform.forward + Vector3.up * 0.5f).normalized * force);
                 }
             }
-        }
-    }
-
-    [TargetRpc]
-    public void TargetApplyPush(NetworkConnection target, Vector3 pushForce)
-    {
-        // This runs only on the target client, including host
-        if (!isLocalPlayer)
-        {
-            Debug.Log("[Client] Skipping push: not local player");
-            return;
-        }
-
-        Rigidbody rb = GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            Debug.Log("[Client] Applying push from server");
-            rb.AddForce(pushForce, ForceMode.Impulse);
-        }
-    }
-
-    public void ApplyPushDirectly(Vector3 pushForce)
-    {
-        Debug.Log("[Host] Applying push directly");
-        Rigidbody rb = GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.AddForce(pushForce, ForceMode.Impulse);
         }
     }
 
@@ -325,33 +272,9 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerPullRange, LayerMask.GetMask("Player")))
-        {
-            NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
-            if (netId != null)
-            {
-                GameObject target = netId.gameObject;
-                Player targetMovement = target.GetComponent<Player>();
+        int layerMask = LayerMask.GetMask("Player", "Movable");
 
-                // Get the correct connection
-                NetworkConnectionToClient conn = netId.connectionToClient;
-
-                if (conn != null)
-                {
-                    targetMovement.TargetApplyPull(conn, transform.position + transform.forward);
-                }
-                else
-                {
-                    Debug.Log("[Server] No connectionToClient — target is probably the host. Call directly.");
-                    if (targetMovement.isLocalPlayer)
-                    {
-                        targetMovement.ApplyPullDirectly(transform.position + transform.forward);
-                    }
-                }
-            }
-        }
-
-        if (serverScene.Raycast(origin, direction, out hit, playerPullRange, LayerMask.GetMask("Movable")))
+        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerPullRange, layerMask))
         {
             NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
             if (netId != null)
@@ -364,42 +287,13 @@ public class Player : NetworkBehaviour
 
                 if (conn != null)
                 {
-                    targetMovement.TargetApplyPull(conn, transform.position + transform.forward);
+                    targetMovement.TargetApplyPull(conn, transform.position + transform.forward * 1.1f);
                 }
                 else
                 {
-                    Debug.Log("[Server] No connectionToClient — target is probably the host. Call directly.");
-                    targetMovement.ApplyPullDirectly(transform.position + transform.forward);
+                    targetMovement.ApplyPullDirectly(transform.position + transform.forward * 1.1f);
                 }
             }
-        }
-    }
-
-    [TargetRpc]
-    public void TargetApplyPull(NetworkConnection target, Vector3 pullPos)
-    {
-        // This runs only on the target client, including host
-        if (!isLocalPlayer)
-        {
-            Debug.Log("[Client] Skipping pull: not local player");
-            return;
-        }
-
-        Rigidbody rb = GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            Debug.Log("[Client] Applying pull from server");
-            rb.transform.position = pullPos;
-        }
-    }
-
-    public void ApplyPullDirectly(Vector3 pullPos)
-    {
-        Debug.Log("[Host] Applying pull directly");
-        Rigidbody rb = GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.transform.position = pullPos;
         }
     }
 
