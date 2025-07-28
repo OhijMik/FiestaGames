@@ -100,6 +100,19 @@ public class Player : NetworkBehaviour
                     CmdRequestPull(transform.position, transform.forward);
                 }
             }
+
+            if (currentPhysicsScene.Raycast(ray.origin, ray.direction, out hit, playerPullRange, LayerMask.GetMask("Movable")))
+            {
+                if (Input.GetKey(KeyCode.Mouse1))
+                {
+                    NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
+                    if (netId != null)
+                    {
+                        GameObject target = netId.gameObject;
+                        target.transform.position = transform.position + transform.forward;
+                    }
+                }
+            }
         }
         else
         {
@@ -119,6 +132,19 @@ public class Player : NetworkBehaviour
                 if (Input.GetKey(KeyCode.Mouse1))
                 {
                     CmdRequestPull(transform.position, transform.forward);
+                }
+            }
+
+            if (Physics.Raycast(transform.position, direction, out hit, playerPullRange, LayerMask.GetMask("Movable")))
+            {
+                if (Input.GetKey(KeyCode.Mouse1))
+                {
+                    NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
+                    if (netId != null)
+                    {
+                        GameObject target = netId.gameObject;
+                        target.transform.position = transform.position + transform.forward;
+                    }
                 }
             }
         }
