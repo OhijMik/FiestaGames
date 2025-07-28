@@ -19,7 +19,7 @@ public class Player : NetworkBehaviour
     private float pushCurrCooldown = 0;
     private float playerPushRange = 2;
 
-    private float playerPullRange = 2;
+    private float playerPullRange = 1;
 
     private float maxPlayerDist = 15;
     public float playerTpCooldown = 5;
