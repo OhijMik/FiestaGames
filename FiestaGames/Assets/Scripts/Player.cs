@@ -30,7 +30,7 @@ public class Player : NetworkBehaviour
 
     bool jump = false;
 
-    GameObject pulling;
+    NetworkIdentity pullingNetId;
 
 
     void Awake()
@@ -55,7 +55,7 @@ public class Player : NetworkBehaviour
 
         if (Input.GetKeyUp(KeyCode.Mouse1))
         {
-            pulling = null;
+            pullingNetId = null;
         }
 
         if (NetworkServer.active)
@@ -70,14 +70,10 @@ public class Player : NetworkBehaviour
             Ray ray = new Ray(origin, direction);
             RaycastHit hit;
 
-            Vector3 point1 = transform.position + Vector3.up * 0.5f; // top of capsule
-            Vector3 point2 = transform.position - Vector3.up * 0.5f; // bottom of capsule
-            float radius = 0.5f;
-
             int layerMask = LayerMask.GetMask("Player", "Movable");
 
             // Use the custom physics scene to perform the raycast
-            if (currentPhysicsScene.CapsuleCast(point1, point2, radius, ray.direction, out hit, playerPushRange, layerMask))
+            if (currentPhysicsScene.Raycast(transform.position, ray.direction, out hit, playerPushRange, layerMask))
             {
                 if (Input.GetKey(KeyCode.Mouse0) && pushCurrCooldown == 0)
                 {
@@ -86,26 +82,26 @@ public class Player : NetworkBehaviour
                 }
             }
 
-            if (currentPhysicsScene.CapsuleCast(point1, point2, radius, ray.direction, out hit, playerPullRange, layerMask))
+            // if (currentPhysicsScene.Raycast(transform.position, ray.direction, out hit, playerPullRange, layerMask))
+            // {
+            //     if ((hit.transform.gameObject == pulling || !pulling) && Input.GetKey(KeyCode.Mouse1))
+            //     {
+            //         CmdRequestPull(transform.position, transform.forward);
+            //         pulling = hit.transform.gameObject;
+            //     }
+            // }
+            if (Input.GetKey(KeyCode.Mouse1))
             {
-                if ((hit.transform.gameObject == pulling || !pulling) && Input.GetKey(KeyCode.Mouse1))
-                {
-                    CmdRequestPull(transform.position, transform.forward);
-                    pulling = hit.transform.gameObject;
-                }
+                CmdRequestPull(transform.position, transform.forward);
             }
         }
         else
         {
             // On clients: use regular raycast
             Vector3 direction = transform.TransformDirection(Vector3.forward);
-            Vector3 point1 = transform.position + Vector3.up * 0.5f; // top of capsule
-            Vector3 point2 = transform.position - Vector3.up * 0.5f; // bottom of capsule
-            float radius = 0.5f;
-
             int layerMask = LayerMask.GetMask("Player", "Movable");
 
-            if (Physics.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, playerPushRange, layerMask))
+            if (Physics.Raycast(transform.position, direction, out RaycastHit hit, playerPushRange, layerMask))
             {
                 if (Input.GetKey(KeyCode.Mouse0) && pushCurrCooldown == 0)
                 {
@@ -114,14 +110,19 @@ public class Player : NetworkBehaviour
                 }
             }
 
-            if (Physics.CapsuleCast(point1, point2, radius, direction, out hit, playerPullRange, layerMask))
+            // if (Physics.Raycast(transform.position, direction, out hit, playerPullRange, layerMask))
+            // {
+            //     if ((hit.transform.gameObject == pulling || !pulling) && Input.GetKey(KeyCode.Mouse1))
+            //     {
+            //         CmdRequestPull(transform.position, transform.forward);
+            //         pulling = hit.transform.gameObject;
+            //     }
+            // }
+            if (Input.GetKey(KeyCode.Mouse1))
             {
-                if ((hit.transform.gameObject == pulling || !pulling) && Input.GetKey(KeyCode.Mouse1))
-                {
-                    CmdRequestPull(transform.position, transform.forward);
-                    pulling = hit.transform.gameObject;
-                }
+                CmdRequestPull(transform.position, transform.forward);
             }
+
         }
 
         inputX = Input.GetAxis("Horizontal");
@@ -243,11 +244,7 @@ public class Player : NetworkBehaviour
 
         int layerMask = LayerMask.GetMask("Player", "Movable");
 
-        Vector3 point1 = transform.position + Vector3.up * 0.5f; // top of capsule
-        Vector3 point2 = transform.position - Vector3.up * 0.5f; // bottom of capsule
-        float radius = 0.5f;
-
-        if (serverScene.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, playerPushRange, layerMask))
+        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerPushRange, layerMask))
         {
             NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
             if (netId != null)
@@ -290,17 +287,33 @@ public class Player : NetworkBehaviour
             return;
         }
 
+        if (pullingNetId)
+        {
+            GameObject target = pullingNetId.gameObject;
+            MovableObject targetMovement = target.GetComponent<MovableObject>();
+
+            // Get the correct connection
+            NetworkConnectionToClient conn = pullingNetId.connectionToClient;
+
+            if (conn != null)
+            {
+                targetMovement.TargetApplyPull(conn, transform.position + transform.forward * 1.5f);
+            }
+            else
+            {
+                targetMovement.ApplyPullDirectly(transform.position + transform.forward * 1.5f);
+            }
+            return;
+        }
+
         int layerMask = LayerMask.GetMask("Player", "Movable");
-
-        Vector3 point1 = transform.position + Vector3.up * 0.5f; // top of capsule
-        Vector3 point2 = transform.position - Vector3.up * 0.5f; // bottom of capsule
-        float radius = 0.5f;
-
-        if (serverScene.CapsuleCast(point1, point2, radius, direction, out RaycastHit hit, playerPullRange, layerMask))
+        if (serverScene.Raycast(origin, direction, out RaycastHit hit, playerPullRange, layerMask))
         {
             NetworkIdentity netId = hit.collider.GetComponent<NetworkIdentity>();
             if (netId != null)
             {
+                pullingNetId = netId;
+
                 GameObject target = netId.gameObject;
                 MovableObject targetMovement = target.GetComponent<MovableObject>();
 
@@ -309,11 +322,11 @@ public class Player : NetworkBehaviour
 
                 if (conn != null)
                 {
-                    targetMovement.TargetApplyPull(conn, transform.position + transform.forward * 1.5f);
+                    targetMovement.TargetApplyPull(conn, transform.position + transform.forward * 2f);
                 }
                 else
                 {
-                    targetMovement.ApplyPullDirectly(transform.position + transform.forward * 1.5f);
+                    targetMovement.ApplyPullDirectly(transform.position + transform.forward * 2f);
                 }
             }
         }
